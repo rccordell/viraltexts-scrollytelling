@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -21,7 +21,7 @@ interface WaypointPanelProps {
   selectedId?: string;
   drawArmed: boolean;
   onToggleDraw: () => void;
-  onAddEntry: (kind: "header" | "note") => void;
+  onAddEntry: (kind: "header" | "note" | "prose") => void;
   onSelect: (id: string) => void;
   onChangeTitle: (id: string, title: string) => void;
   onChangeBody: (id: string, body: string) => void;
@@ -69,6 +69,9 @@ export function WaypointPanel({
           <button type="button" onClick={() => onAddEntry("note")}>
             ＋ Note
           </button>
+          <button type="button" onClick={() => onAddEntry("prose")}>
+            ＋ Prose
+          </button>
         </div>
       </div>
 
@@ -113,18 +116,31 @@ const KIND_LABEL: Record<Waypoint["kind"], string | null> = {
   waypoint: null,
   header: "Header",
   note: "Note",
+  prose: "Prose",
 };
 
 const TITLE_PLACEHOLDER: Record<Waypoint["kind"], string> = {
   waypoint: "Waypoint title (optional)",
   header: "Header text",
   note: "Note title (optional)",
+  prose: "Prose title (optional)",
 };
 
 const UNTITLED_LABEL: Record<Waypoint["kind"], string> = {
   waypoint: "Untitled waypoint",
   header: "Untitled header",
   note: "Untitled note",
+  prose: "Untitled prose",
+};
+
+const BODY_PLACEHOLDER: Record<Waypoint["kind"], string> = {
+  waypoint: "Write the text for this passage (markdown supported)…",
+  header: "",
+  note: "Write the text for this passage (markdown supported)…",
+  prose:
+    "Write a long passage of text here. Link a word or phrase to a region " +
+    "with [phrase](#region-id) — click \"Copy link\" on a waypoint card " +
+    "above to get its id, then paste and fill in the link text.",
 };
 
 function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onChangeBody, onDelete }: CardProps) {
@@ -133,10 +149,19 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
   });
   const elRef = useRef<HTMLLIElement | null>(null);
   const kindLabel = KIND_LABEL[waypoint.kind];
+  const [justCopied, setJustCopied] = useState(false);
 
   useEffect(() => {
     if (selected) elRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [selected]);
+
+  function copyAnchorLink(e: React.MouseEvent) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(`[](#${waypoint.id})`).then(() => {
+      setJustCopied(true);
+      setTimeout(() => setJustCopied(false), 1500);
+    });
+  }
 
   return (
     <li
@@ -169,6 +194,16 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
             {waypoint.title?.trim() || UNTITLED_LABEL[waypoint.kind]}
           </span>
         )}
+        {selected && waypoint.kind === "waypoint" && (
+          <button
+            type="button"
+            className="waypoint-card__copy-link"
+            onClick={copyAnchorLink}
+            title="Copy a markdown link to this region, to paste into a Prose block"
+          >
+            {justCopied ? "Copied!" : "Copy link"}
+          </button>
+        )}
         <button
           type="button"
           className="waypoint-card__delete"
@@ -184,11 +219,11 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
       {selected && waypoint.kind !== "header" && (
         <textarea
           className="waypoint-card__body"
-          placeholder="Write the text for this passage (markdown supported)…"
+          placeholder={BODY_PLACEHOLDER[waypoint.kind]}
           value={waypoint.body}
           onChange={(e) => onChangeBody(e.target.value)}
           onClick={(e) => e.stopPropagation()}
-          rows={4}
+          rows={waypoint.kind === "prose" ? 10 : 4}
         />
       )}
     </li>

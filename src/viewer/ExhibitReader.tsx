@@ -6,6 +6,7 @@ import { useOpenSeadragonViewer } from "./useOpenSeadragonViewer";
 import { flyToWaypoint } from "./flyToWaypoint";
 import { useScrollSync } from "./scrollSync";
 import { WaypointBlock } from "./WaypointBlock";
+import { ProseBlock } from "./ProseBlock";
 import "./ExhibitReader.css";
 
 interface ExhibitReaderProps {
@@ -62,15 +63,34 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
             <ReactMarkdown>{exhibit.intro}</ReactMarkdown>
           </div>
         )}
-        {page.waypoints.map((waypoint) => (
-          <WaypointBlock
-            key={waypoint.id}
-            waypoint={waypoint}
-            active={waypoint.id === activeId}
-            registerRef={registerBlock(waypoint.id)}
-            onClick={() => jumpTo(waypoint.id)}
-          />
-        ))}
+        {page.waypoints.map((waypoint) => {
+          if (waypoint.kind === "prose") {
+            return (
+              <ProseBlock
+                key={waypoint.id}
+                waypoint={waypoint}
+                activeId={activeId}
+                registerBlock={registerBlock}
+                onJumpTo={jumpTo}
+              />
+            );
+          }
+          // A waypoint with no title and no body exists only to be
+          // referenced from inline prose elsewhere (via `[text](#its-id)`)
+          // — it never gets its own block in the reading flow.
+          const isAnchorOnly =
+            waypoint.kind === "waypoint" && !waypoint.title?.trim() && !waypoint.body?.trim();
+          if (isAnchorOnly) return null;
+          return (
+            <WaypointBlock
+              key={waypoint.id}
+              waypoint={waypoint}
+              active={waypoint.id === activeId}
+              registerRef={registerBlock(waypoint.id)}
+              onClick={() => jumpTo(waypoint.id)}
+            />
+          );
+        })}
         {exhibit.pages.length > 1 && (
           <div className="exhibit-reader__page-nav">
             <button

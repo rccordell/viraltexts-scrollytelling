@@ -38,16 +38,23 @@
           "kind": "waypoint",
           "region": { "type": "rect", "x": 300, "y": 1100, "width": 1000, "height": 700 },
           "zoomPadding": 0.15,
-          "title": "Region C",
-          "body": "This is **Region C**, bottom-left (green box)."
+          "title": "",
+          "body": ""
         },
         {
           "id": "wp-d",
           "kind": "waypoint",
           "region": { "type": "rect", "x": 1600, "y": 1200, "width": 1200, "height": 700 },
           "zoomPadding": 0.15,
-          "title": "Region D",
-          "body": "This is **Region D**, bottom-right (purple box)."
+          "title": "",
+          "body": ""
+        },
+        {
+          "id": "prose-test",
+          "kind": "prose",
+          "zoomPadding": 0.15,
+          "title": "Inline references",
+          "body": "This paragraph is testing inline references rather than whole blocks. Here's a mention of the [green box in the bottom-left](#wp-c), woven right into a sentence, and a bit further along the [purple box in the bottom-right](#wp-d) gets its own aside. There's also a [real external link](https://example.com) to confirm normal links still behave normally."
         }
       ]
     },

@@ -59,6 +59,25 @@
   border-left-color: var(--exhibit-accent, #b8862b);
 }
 
+.prose-block {
+  margin-bottom: 2rem;
+}
+
+.prose-block h3 {
+  margin-top: 0;
+}
+
+.prose-anchor {
+  cursor: pointer;
+  border-bottom: 1px dotted var(--exhibit-accent, #b8862b);
+  transition: background 0.2s ease;
+}
+
+.prose-anchor--active {
+  background: color-mix(in srgb, var(--exhibit-accent, #b8862b) 25%, transparent);
+  border-bottom-style: solid;
+}
+
 .exhibit-reader__page-nav {
   display: flex;
   justify-content: space-between;

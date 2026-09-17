@@ -73,10 +73,10 @@ export function useExhibitState(slug: string) {
     [mutatePage],
   );
 
-  /** Appends a "header" (subhead, title only) or "note" (prose, no region)
-   * entry — narrative content between waypoints that doesn't move the image. */
+  /** Appends a "header" (subhead), "note", or "prose" entry — narrative
+   * content with no region of its own that doesn't move the image. */
   const addEntry = useCallback(
-    (pageId: string, kind: "header" | "note") => {
+    (pageId: string, kind: "header" | "note" | "prose") => {
       const id = crypto.randomUUID();
       mutatePage(pageId, (p) => ({
         ...p,

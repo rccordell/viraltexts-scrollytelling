@@ -14,8 +14,14 @@ export const regionSchema = rectRegionSchema;
 // "header" and "note" are narrative entries with no region — they sit
 // between waypoints in reading order but never move the image; a "header"
 // is a short subhead (title only), a "note" is a block of prose (body only,
-// title optional).
-export const entryKindSchema = z.enum(["waypoint", "header", "note"]);
+// title optional). "prose" is also a region-free block of long-form text,
+// but its body can contain inline links like `[phrase](#some-waypoint-id)`
+// that reference a *different* waypoint's region — clicking or scrolling to
+// that phrase pans/zooms to it, same as a full waypoint block would. A
+// waypoint referenced only this way (never given its own title or body) is
+// left out of the reader's block-by-block flow entirely — it exists solely
+// as a region for inline prose to point at.
+export const entryKindSchema = z.enum(["waypoint", "header", "note", "prose"]);
 
 export const waypointSchema = z.object({
   id: z.string(),

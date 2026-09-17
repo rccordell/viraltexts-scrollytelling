@@ -26,6 +26,9 @@ v1 + v2 complete:
 - [x] Static build + deploy docs
 - [x] Standalone single-exhibit export (`npm run export`) for uploading one
       exhibit to any host, independent of the multi-exhibit app
+- [x] Inline text-linked regions: a word or phrase mid-paragraph — not just
+      a whole block — can pan/zoom to a region, via a "Prose" entry whose
+      markdown contains `[phrase](#some-waypoint-id)`
 
 Deliberately left out: accounts/multi-user editing, polygon regions
 (rectangles only — the schema is polygon-ready), drag-and-drop image upload
@@ -61,10 +64,17 @@ Opens the visual editor at `http://localhost:5174/editor.html`. From there:
    drag on the image to create a waypoint; write its text in the sidebar
    (markdown supported). "＋ Header"/"＋ Note" add text entries with no
    linked region. Drag cards to reorder.
-4. Use "Box appearance" and "Reader appearance" in the sidebar to set the
+4. For a word or phrase *inside* a longer passage to pan/zoom the image —
+   rather than a whole separate block — draw the region as a waypoint but
+   leave its title and body empty (it becomes invisible in the reader,
+   existing only as a jump target), click **Copy link** on that card to
+   copy `[](#its-id)`, then add a "＋ Prose" block and paste that into the
+   flowing text, filling in the link text between the brackets:
+   `[the phrase](#its-id)`.
+5. Use "Box appearance" and "Reader appearance" in the sidebar to set the
    drawn-box style and the published reader's font/colors/custom CSS.
-5. Click **Preview** at any time to see the live scrollytelling reader.
-6. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
+6. Click **Preview** at any time to see the live scrollytelling reader.
+7. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
 
 The editor only runs locally during authoring — it's never part of the
 published site (see "How it's built" below).
