@@ -1,0 +1,278 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #1b1b1f;
+  color: #eee;
+}
+
+.editor-status {
+  padding: 2rem;
+}
+
+.exhibit-picker,
+.image-import-form {
+  max-width: 480px;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}
+
+.exhibit-picker ul {
+  list-style: none;
+  padding: 0;
+}
+
+.exhibit-picker__error,
+.image-import-form__error {
+  color: #f28b82;
+}
+
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.editor-header__title {
+  font-size: 1.1rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  flex: 1;
+}
+
+.editor-header__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editor-body {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.editor-canvas {
+  position: relative;
+  background: #111;
+}
+
+.annotation-canvas__viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.annotation-canvas__viewer--drawing,
+.annotation-canvas__viewer--drawing * {
+  cursor: crosshair !important;
+}
+
+.editor-sidebar {
+  overflow-y: auto;
+  padding: 1rem;
+  border-left: 1px solid #333;
+}
+
+.editor-sidebar__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #999;
+  margin-bottom: 0.35rem;
+}
+
+.editor-sidebar__intro {
+  width: 100%;
+  margin-bottom: 1rem;
+  background: #26262b;
+  color: inherit;
+  border: 1px solid #3a3a40;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.style-settings {
+  position: sticky;
+  top: -1rem;
+  margin: -1rem -1rem 1rem;
+  padding: 1rem 1rem 0.5rem;
+  background: #1b1b1f;
+  border-bottom: 1px solid #3a3a40;
+  z-index: 1;
+}
+
+.style-settings__toggle {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  width: 100%;
+  text-align: left;
+}
+
+.style-settings__body {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.style-settings__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.style-settings__row--indent {
+  margin-left: 1.3rem;
+}
+
+.style-settings__row label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.waypoint-panel__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.waypoint-panel__draw-toggle {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  border: 1px solid #3a3a40;
+  background: #26262b;
+  color: inherit;
+  cursor: pointer;
+}
+
+.waypoint-panel__draw-toggle--active {
+  background: #fbbf24;
+  color: #1b1b1f;
+  border-color: #fbbf24;
+}
+
+.waypoint-panel__toolbar-secondary {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.waypoint-panel__toolbar-secondary button {
+  flex: 1;
+  padding: 0.4rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  border: 1px solid #3a3a40;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.waypoint-panel__empty {
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.waypoint-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.waypoint-card {
+  background: #26262b;
+  border: 2px solid #3a3a40;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.waypoint-card--selected {
+  border-color: #fbbf24;
+  background: #3a2f14;
+  box-shadow: 0 0 0 1px #fbbf24;
+}
+
+.waypoint-card--header,
+.waypoint-card--note {
+  border-style: dashed;
+}
+
+.waypoint-card__kind-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #999;
+  background: #1b1b1f;
+  border-radius: 3px;
+  padding: 0.15rem 0.35rem;
+}
+
+.waypoint-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.waypoint-card--selected .waypoint-card__header {
+  margin-bottom: 0.4rem;
+}
+
+.waypoint-card__handle {
+  cursor: grab;
+  color: #888;
+}
+
+.waypoint-card__title {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-weight: 600;
+}
+
+.waypoint-card__title-display {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.waypoint-card__delete {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+}
+
+.waypoint-card__body {
+  width: 100%;
+  background: #1b1b1f;
+  color: inherit;
+  border: 1px solid #3a3a40;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family: inherit;
+  resize: vertical;
+}

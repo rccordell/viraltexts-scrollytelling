@@ -1,0 +1,36 @@
+{
+  "name": "exhibit-tool",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/generateManifest.mjs && vite",
+    "edit": "node scripts/generateManifest.mjs && vite --config vite.editor.config.ts",
+    "build": "node scripts/generateManifest.mjs && tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@annotorious/openseadragon": "^3.8.10",
+    "@annotorious/react": "^3.8.10",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "openseadragon": "^6.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "oxlint": "^1.81.0",
+    "sharp": "^0.35.4",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vite-plugin-static-copy": "^4.1.1"
+  }
+}
