@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { api } from "./api";
-import type { Exhibit } from "../viewer/schema";
+import type { ExhibitImage } from "../viewer/schema";
 import "./editor.css";
 
 interface ImageImportFormProps {
   slug: string;
-  onImported: (image: Exhibit["image"]) => void;
+  pageId: string;
+  pageLabel: string;
+  onImported: (image: ExhibitImage) => void;
 }
 
-export function ImageImportForm({ slug, onImported }: ImageImportFormProps) {
+export function ImageImportForm({ slug, pageId, pageLabel, onImported }: ImageImportFormProps) {
   const [sourcePath, setSourcePath] = useState("");
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export function ImageImportForm({ slug, onImported }: ImageImportFormProps) {
     setError(null);
     setImporting(true);
     try {
-      const result = await api.importImage(slug, sourcePath);
+      const result = await api.importImage(slug, pageId, sourcePath);
       onImported({
         dziPath: result.dziPath,
         width: result.width,
@@ -34,7 +36,9 @@ export function ImageImportForm({ slug, onImported }: ImageImportFormProps) {
 
   return (
     <div className="image-import-form">
-      <h1>Import an image for "{slug}"</h1>
+      <h1>
+        Import an image for "{slug}" — {pageLabel}
+      </h1>
       <p>
         Path to a source image (PNG/JPEG/TIFF/WebP), relative to the project
         root — e.g. <code>exhibits/{slug}/source.tiff</code>.

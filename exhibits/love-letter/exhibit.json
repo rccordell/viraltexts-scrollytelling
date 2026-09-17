@@ -1,45 +1,125 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "love-letter",
   "title": "A \"Stunning\" Love Letter to Viral Texts",
   "subtitle": "The Raftsman's Journal, Clearfield, PA, November 4, 1868",
   "intro": "Like most nineteenth-century newspapers, *The Raftsman's Journal* sought to connect its readers in rural Clearfield, Pennsylvania with wider worlds of news, information, and literature. Newspaper editors subscribed to each others' newspapers, then clipped and reprinted content their readers would appreciate — sometimes changing the text in the process. Texts of all kinds circulated this way, connecting readers from New England to New Orleans to California.\n\nThis exhibit hints at the breadth — and the oddities — of nineteenth-century reprinting found by the Viral Texts Project, focusing on the \"sublimely 'splendiferous'\" love letter reprinted in the middle of this page. Scroll through the annotations below to explore it.",
   "credits": "Exhibit created by Ryan Cordell, Jonathan Fitzgerald, and Abby Mullen for the Viral Texts Project at Northeastern University's NULab for Texts, Maps, and Networks. Newspaper page courtesy of Chronicling America / the National Digital Newspaper Program (LCCN sn85054616).",
-  "image": {
-    "dziPath": "tiles.dzi",
-    "width": 5780,
-    "height": 7634,
-    "tileSize": 256,
-    "overlap": 1
-  },
-  "waypoints": [
+  "pages": [
     {
-      "id": "wp-headline",
-      "region": { "type": "rect", "x": 3215, "y": 1250, "width": 775, "height": 350 },
-      "zoomPadding": 0.2,
-      "title": "A \"stunning\" Love Letter",
-      "body": "The editors introduce the letter as \"sublimely 'splendiferous'\" and recommend it \"as a model to letter writers\" — setting up the joke before it even starts. The opening line establishes the tone for everything that follows: *\"my heart flops up and down like a churn dasher.\"* Exaggerated, barnyard-and-object comparisons like this were themselves a popular comic convention, circulating across many nineteenth-century newspapers."
-    },
-    {
-      "id": "wp-sorrel-horse",
-      "region": { "type": "rect", "x": 3215, "y": 3260, "width": 775, "height": 400 },
-      "zoomPadding": 0.2,
-      "title": "A sorrel horse, an army cracker",
-      "body": "The comparisons keep piling up — hair like *\"the mane of a sorrel horse, powdered with gold,\"* eyes holding \"legions of little Cupids, bathing like a cohort of ants in an old army cracker.\" The humor comes from borrowing the language of the barn and the pantry to describe romantic devotion, a favorite move of the comic \"stump speech\" and mock-sentimental writing that traveled widely as reprinted \"viral texts.\""
-    },
-    {
-      "id": "wp-barnyard-devotion",
-      "region": { "type": "rect", "x": 3215, "y": 4785, "width": 775, "height": 325 },
-      "zoomPadding": 0.2,
-      "title": "Stronger than Coffy's patent butter",
-      "body": "*\"My love for you is stronger than the smell of Coffy's patent butter, or the kick of a young cow.\"* The letter never lets its declarations of love rise above the barnyard — devotion measured out in bacon, milk, and \"a kitten's first caterwaul.\""
-    },
-    {
-      "id": "wp-signature",
-      "region": { "type": "rect", "x": 3215, "y": 5900, "width": 775, "height": 180 },
-      "zoomPadding": 0.2,
-      "title": "Julius Epaminondas Muggins",
-      "body": "The letter closes with mock-tragic resignation and a signature as absurd as everything before it. Letters like this one — sometimes with different names attached — circulated in newspapers across the country for years, part of the vast, shared repertoire of nineteenth-century reprinting the Viral Texts Project traces."
+      "id": "page-1",
+      "image": {
+        "dziPath": "tiles.dzi",
+        "width": 5780,
+        "height": 7634,
+        "tileSize": 256,
+        "overlap": 1
+      },
+      "waypoints": [
+        {
+          "id": "wp-headline",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 3215,
+            "y": 1250,
+            "width": 775,
+            "height": 350
+          },
+          "zoomPadding": 0.2,
+          "title": "A \"stunning\" Love Letter",
+          "body": "The editors introduce the letter as \"sublimely 'splendiferous'\" and recommend it \"as a model to letter writers\" — setting up the joke before it even starts. The opening line establishes the tone for everything that follows: *\"my heart flops up and down like a churn dasher.\"* Exaggerated, barnyard-and-object comparisons like this were themselves a popular comic convention, circulating across many nineteenth-century newspapers."
+        },
+        {
+          "id": "wp-sorrel-horse",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 3215,
+            "y": 3260,
+            "width": 775,
+            "height": 400
+          },
+          "zoomPadding": 0.2,
+          "title": "A sorrel horse, an army cracker",
+          "body": "The comparisons keep piling up — hair like *\"the mane of a sorrel horse, powdered with gold,\"* eyes holding \"legions of little Cupids, bathing like a cohort of ants in an old army cracker.\" The humor comes from borrowing the language of the barn and the pantry to describe romantic devotion, a favorite move of the comic \"stump speech\" and mock-sentimental writing that traveled widely as reprinted \"viral texts.\""
+        },
+        {
+          "id": "wp-barnyard-devotion",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 3215,
+            "y": 4785,
+            "width": 775,
+            "height": 325
+          },
+          "zoomPadding": 0.2,
+          "title": "Stronger than Coffy's patent butter",
+          "body": "*\"My love for you is stronger than the smell of Coffy's patent butter, or the kick of a young cow.\"* The letter never lets its declarations of love rise above the barnyard — devotion measured out in bacon, milk, and \"a kitten's first caterwaul.\""
+        },
+        {
+          "id": "wp-signature",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 3215,
+            "y": 5900,
+            "width": 775,
+            "height": 180
+          },
+          "zoomPadding": 0.2,
+          "title": "Julius Epaminondas Muggins",
+          "body": "The letter closes with mock-tragic resignation and a signature as absurd as everything before it. Letters like this one — sometimes with different names attached — circulated in newspapers across the country for years, part of the vast, shared repertoire of nineteenth-century reprinting the Viral Texts Project traces."
+        },
+        {
+          "id": "hdr-elsewhere",
+          "kind": "header",
+          "title": "Elsewhere on the page"
+        },
+        {
+          "id": "wp-almanac",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 231,
+            "y": 1181,
+            "width": 639,
+            "height": 379
+          },
+          "zoomPadding": 0.2,
+          "title": "Marjorie's Almanac",
+          "body": "In the paper's \"Select Poetry\" column, well above the love letter, ran this seasonal verse cycling through the year — *\"Don't you think that May-time's / Pleasanter than March?\"* Poetry like this, easily clipped and reset in a single column, was some of the most widely and durably reprinted content in the exchange network — as portable as the love letter itself, just quieter about it."
+        },
+        {
+          "id": "wp-roger-williams",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 4046,
+            "y": 1270,
+            "width": 724,
+            "height": 190
+          },
+          "zoomPadding": 0.2,
+          "title": "Who Ate Roger Williams?",
+          "body": "A short curiosity lifted from a chemistry textbook: when Rhode Island founder Roger Williams's grave was opened, his body was found to have dissolved entirely — replaced by the roots of a nearby apple tree, grown down through where his coffin had been. Macabre-but-instructive filler like this circulated in the very same exchange network that carried the love letter."
+        },
+        {
+          "id": "wp-hoofland",
+          "kind": "waypoint",
+          "region": {
+            "type": "rect",
+            "x": 4780,
+            "y": 1235,
+            "width": 920,
+            "height": 280
+          },
+          "zoomPadding": 0.2,
+          "title": "Hoofland's German Bitters",
+          "body": "Patent-medicine advertising like this — promising to cure \"all diseases of the Liver, Stomach, or digestive organs\" — was a fixture of nineteenth-century newspaper pages, often running unchanged for months. A reminder that not everything reprinted on a page like this one was \"viral\" in the same playful sense as the love letter; some content simply paid for its own repetition."
+        }
+      ]
     }
   ]
 }

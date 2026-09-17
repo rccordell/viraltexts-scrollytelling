@@ -1,14 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   exhibitSchema,
+  migrateExhibitRaw,
   type AnnotationStyle,
   type Exhibit,
+  type ExhibitImage,
+  type Page,
   type Region,
+  type Theme,
   type Waypoint,
 } from "../viewer/schema";
 import { api } from "./api";
 
 export type LoadStatus = "loading" | "ready" | "error";
+
+const BLANK_IMAGE: ExhibitImage = {
+  dziPath: "tiles.dzi",
+  width: 0,
+  height: 0,
+  tileSize: 256,
+  overlap: 1,
+};
 
 export function useExhibitState(slug: string) {
   const [exhibit, setExhibit] = useState<Exhibit | null>(null);
@@ -24,7 +36,7 @@ export function useExhibitState(slug: string) {
     api
       .getExhibit(slug)
       .then((raw) => {
-        setExhibit(exhibitSchema.parse(raw));
+        setExhibit(exhibitSchema.parse(migrateExhibitRaw(raw)));
         setStatus("ready");
       })
       .catch((err) => {
@@ -38,86 +50,149 @@ export function useExhibitState(slug: string) {
     setDirty(true);
   }, []);
 
-  const addWaypoint = useCallback(
-    (id: string, region: Region) => {
+  const mutatePage = useCallback(
+    (pageId: string, fn: (p: Page) => Page) => {
       mutate((e) => ({
         ...e,
+        pages: e.pages.map((p) => (p.id === pageId ? fn(p) : p)),
+      }));
+    },
+    [mutate],
+  );
+
+  const addWaypoint = useCallback(
+    (pageId: string, id: string, region: Region) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
         waypoints: [
-          ...e.waypoints,
+          ...p.waypoints,
           { id, kind: "waypoint", region, zoomPadding: 0.15, body: "" } satisfies Waypoint,
         ],
       }));
     },
-    [mutate],
+    [mutatePage],
   );
 
   /** Appends a "header" (subhead, title only) or "note" (prose, no region)
    * entry — narrative content between waypoints that doesn't move the image. */
   const addEntry = useCallback(
-    (kind: "header" | "note") => {
+    (pageId: string, kind: "header" | "note") => {
       const id = crypto.randomUUID();
-      mutate((e) => ({
-        ...e,
-        waypoints: [
-          ...e.waypoints,
-          { id, kind, zoomPadding: 0.15, body: "" } satisfies Waypoint,
-        ],
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: [...p.waypoints, { id, kind, zoomPadding: 0.15, body: "" } satisfies Waypoint],
       }));
       return id;
     },
-    [mutate],
+    [mutatePage],
   );
 
   const updateWaypointRegion = useCallback(
-    (id: string, region: Region) => {
-      mutate((e) => ({
-        ...e,
-        waypoints: e.waypoints.map((w) => (w.id === id ? { ...w, region } : w)),
+    (pageId: string, id: string, region: Region) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, region } : w)),
       }));
     },
-    [mutate],
+    [mutatePage],
   );
 
   const updateWaypointBody = useCallback(
-    (id: string, body: string) => {
-      mutate((e) => ({
-        ...e,
-        waypoints: e.waypoints.map((w) => (w.id === id ? { ...w, body } : w)),
+    (pageId: string, id: string, body: string) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, body } : w)),
       }));
     },
-    [mutate],
+    [mutatePage],
   );
 
   const updateWaypointTitle = useCallback(
-    (id: string, title: string) => {
-      mutate((e) => ({
-        ...e,
-        waypoints: e.waypoints.map((w) => (w.id === id ? { ...w, title } : w)),
+    (pageId: string, id: string, title: string) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, title } : w)),
       }));
     },
-    [mutate],
+    [mutatePage],
   );
 
   const removeWaypoint = useCallback(
-    (id: string) => {
-      mutate((e) => ({
-        ...e,
-        waypoints: e.waypoints.filter((w) => w.id !== id),
+    (pageId: string, id: string) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.filter((w) => w.id !== id),
       }));
+    },
+    [mutatePage],
+  );
+
+  const reorderWaypoints = useCallback(
+    (pageId: string, orderedIds: string[]) => {
+      mutatePage(pageId, (p) => {
+        const byId = new Map(p.waypoints.map((w) => [w.id, w]));
+        return {
+          ...p,
+          waypoints: orderedIds.map((id) => byId.get(id)).filter((w): w is Waypoint => !!w),
+        };
+      });
+    },
+    [mutatePage],
+  );
+
+  const reloadPageImage = useCallback(
+    (pageId: string, image: ExhibitImage) => {
+      mutatePage(pageId, (p) => ({ ...p, image }));
+    },
+    [mutatePage],
+  );
+
+  const updatePageTitle = useCallback(
+    (pageId: string, title: string) => {
+      mutatePage(pageId, (p) => ({ ...p, title }));
+    },
+    [mutatePage],
+  );
+
+  // A new page must exist on disk before the import-image endpoint can
+  // tile into it (that endpoint looks the page up in the saved
+  // exhibit.json), so adding a page saves immediately rather than just
+  // marking state dirty like other edits.
+  const addPage = useCallback(async () => {
+    const id = crypto.randomUUID();
+    if (!exhibit) return id;
+    const updated: Exhibit = {
+      ...exhibit,
+      pages: [...exhibit.pages, { id, image: BLANK_IMAGE, waypoints: [] } satisfies Page],
+    };
+    setExhibit(updated);
+    setDirty(true);
+    setSaving(true);
+    try {
+      await api.saveExhibit(slug, updated);
+      setDirty(false);
+    } finally {
+      setSaving(false);
+    }
+    return id;
+  }, [exhibit, slug]);
+
+  const removePage = useCallback(
+    (pageId: string) => {
+      mutate((e) => (e.pages.length <= 1 ? e : { ...e, pages: e.pages.filter((p) => p.id !== pageId) }));
     },
     [mutate],
   );
 
-  const reorderWaypoints = useCallback(
-    (orderedIds: string[]) => {
+  const movePage = useCallback(
+    (pageId: string, direction: -1 | 1) => {
       mutate((e) => {
-        const byId = new Map(e.waypoints.map((w) => [w.id, w]));
-        return {
-          ...e,
-          waypoints: orderedIds
-            .map((id) => byId.get(id))
-            .filter((w): w is Waypoint => !!w),
-        };
+        const index = e.pages.findIndex((p) => p.id === pageId);
+        const target = index + direction;
+        if (index < 0 || target < 0 || target >= e.pages.length) return e;
+        const pages = [...e.pages];
+        [pages[index], pages[target]] = [pages[target], pages[index]];
+        return { ...e, pages };
       });
     },
     [mutate],
@@ -141,13 +216,16 @@ export function useExhibitState(slug: string) {
     }
   }, [exhibit, slug]);
 
-  const reloadImage = useCallback((image: Exhibit["image"]) => {
-    mutate((e) => ({ ...e, image }));
-  }, [mutate]);
-
   const updateAnnotationStyle = useCallback(
     (style: AnnotationStyle) => {
       mutate((e) => ({ ...e, annotationStyle: style }));
+    },
+    [mutate],
+  );
+
+  const updateTheme = useCallback(
+    (theme: Theme) => {
+      mutate((e) => ({ ...e, theme }));
     },
     [mutate],
   );
@@ -165,9 +243,14 @@ export function useExhibitState(slug: string) {
     updateWaypointTitle,
     removeWaypoint,
     reorderWaypoints,
+    reloadPageImage,
+    updatePageTitle,
+    addPage,
+    removePage,
+    movePage,
     updateMeta,
-    reloadImage,
     updateAnnotationStyle,
+    updateTheme,
     save,
   };
 }

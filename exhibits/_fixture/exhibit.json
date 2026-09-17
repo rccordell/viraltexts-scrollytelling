@@ -1,45 +1,84 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "_fixture",
   "title": "Fixture Exhibit",
-  "subtitle": "A synthetic test image with four labeled regions",
-  "intro": "This exhibit exists only to test the viewer's scroll-sync and click-to-jump behavior against known regions.",
+  "subtitle": "A synthetic test exhibit with two pages",
+  "intro": "This exhibit exists only to test the viewer's scroll-sync, click-to-jump, and multi-page navigation against known regions.",
   "credits": "Test fixture, not real content.",
-  "image": {
-    "dziPath": "tiles.dzi",
-    "width": 3000,
-    "height": 2000,
-    "tileSize": 256,
-    "overlap": 1
-  },
-  "waypoints": [
+  "pages": [
     {
-      "id": "wp-a",
-      "region": { "type": "rect", "x": 100, "y": 100, "width": 800, "height": 600 },
-      "zoomPadding": 0.15,
-      "title": "Region A",
-      "body": "This is **Region A**, in the top-left of the fixture image (red box)."
+      "id": "page-1",
+      "title": "Page 1",
+      "image": {
+        "dziPath": "tiles.dzi",
+        "width": 3000,
+        "height": 2000,
+        "tileSize": 256,
+        "overlap": 1
+      },
+      "waypoints": [
+        {
+          "id": "wp-a",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 100, "y": 100, "width": 800, "height": 600 },
+          "zoomPadding": 0.15,
+          "title": "Region A",
+          "body": "This is **Region A**, in the top-left of the fixture image (red box)."
+        },
+        {
+          "id": "wp-b",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 1200, "y": 300, "width": 900, "height": 600 },
+          "zoomPadding": 0.15,
+          "title": "Region B",
+          "body": "This is **Region B**, top-right (blue box)."
+        },
+        {
+          "id": "wp-c",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 300, "y": 1100, "width": 1000, "height": 700 },
+          "zoomPadding": 0.15,
+          "title": "Region C",
+          "body": "This is **Region C**, bottom-left (green box)."
+        },
+        {
+          "id": "wp-d",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 1600, "y": 1200, "width": 1200, "height": 700 },
+          "zoomPadding": 0.15,
+          "title": "Region D",
+          "body": "This is **Region D**, bottom-right (purple box)."
+        }
+      ]
     },
     {
-      "id": "wp-b",
-      "region": { "type": "rect", "x": 1200, "y": 300, "width": 900, "height": 600 },
-      "zoomPadding": 0.15,
-      "title": "Region B",
-      "body": "This is **Region B**, top-right (blue box)."
-    },
-    {
-      "id": "wp-c",
-      "region": { "type": "rect", "x": 300, "y": 1100, "width": 1000, "height": 700 },
-      "zoomPadding": 0.15,
-      "title": "Region C",
-      "body": "This is **Region C**, bottom-left (green box)."
-    },
-    {
-      "id": "wp-d",
-      "region": { "type": "rect", "x": 1600, "y": 1200, "width": 1200, "height": 700 },
-      "zoomPadding": 0.15,
-      "title": "Region D",
-      "body": "This is **Region D**, bottom-right (purple box)."
+      "id": "page-2",
+      "title": "Page 2",
+      "image": {
+        "dziPath": "pages/page-2/tiles.dzi",
+        "width": 2400,
+        "height": 1600,
+        "tileSize": 256,
+        "overlap": 1
+      },
+      "waypoints": [
+        {
+          "id": "wp-e",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 150, "y": 150, "width": 950, "height": 600 },
+          "zoomPadding": 0.15,
+          "title": "Region E",
+          "body": "This is **Region E**, on the second page (teal box) — tests that switching pages loads a different image and waypoint list cleanly."
+        },
+        {
+          "id": "wp-f",
+          "kind": "waypoint",
+          "region": { "type": "rect", "x": 1300, "y": 850, "width": 950, "height": 600 },
+          "zoomPadding": 0.15,
+          "title": "Region F",
+          "body": "This is **Region F**, also on the second page (magenta box)."
+        }
+      ]
     }
   ]
 }

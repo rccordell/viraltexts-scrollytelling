@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ExhibitReader } from "../viewer/ExhibitReader";
-import { exhibitSchema, type Exhibit } from "../viewer/schema";
+import { exhibitSchema, migrateExhibitRaw, type Exhibit } from "../viewer/schema";
 
 interface ExhibitPageProps {
   slug: string;
@@ -19,7 +19,7 @@ export function ExhibitPage({ slug }: ExhibitPageProps) {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         return res.json();
       })
-      .then((json) => setExhibit(exhibitSchema.parse(json)))
+      .then((json) => setExhibit(exhibitSchema.parse(migrateExhibitRaw(json))))
       .catch((err) => setError(String(err)));
   }, [slug, assetBase]);
 

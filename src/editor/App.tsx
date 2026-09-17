@@ -3,13 +3,14 @@ import { useExhibitState } from "./useExhibitState";
 import { AnnotationCanvas, type AnnotationCanvasHandle } from "./AnnotationCanvas";
 import { WaypointPanel } from "./WaypointPanel";
 import { AnnotationStyleSettings } from "./AnnotationStyleSettings";
+import { ThemeSettings } from "./ThemeSettings";
 import { ExhibitReader } from "../viewer/ExhibitReader";
 import { ExhibitPicker } from "./ExhibitPicker";
 import { ImageImportForm } from "./ImageImportForm";
 import { api } from "./api";
 import "./editor.css";
 
-function useSlugFromQuery(): [string | null, (slug: string) => void] {
+function useSlugFromQuery(): [string | null, (slug: string) => void, () => void] {
   const [slug, setSlugState] = useState<string | null>(() =>
     new URLSearchParams(window.location.search).get("slug"),
   );
@@ -19,11 +20,17 @@ function useSlugFromQuery(): [string | null, (slug: string) => void] {
     window.history.pushState({}, "", url);
     setSlugState(next);
   }
-  return [slug, setSlug];
+  function clearSlug() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("slug");
+    window.history.pushState({}, "", url);
+    setSlugState(null);
+  }
+  return [slug, setSlug, clearSlug];
 }
 
 export function App() {
-  const [slug, setSlug] = useSlugFromQuery();
+  const [slug, setSlug, clearSlug] = useSlugFromQuery();
 
   if (!slug) {
     return (
@@ -37,10 +44,10 @@ export function App() {
     );
   }
 
-  return <ExhibitEditor slug={slug} />;
+  return <ExhibitEditor slug={slug} onBack={clearSlug} />;
 }
 
-function ExhibitEditor({ slug }: { slug: string }) {
+function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
   const {
     exhibit,
     status,
@@ -54,12 +61,18 @@ function ExhibitEditor({ slug }: { slug: string }) {
     updateWaypointTitle,
     removeWaypoint,
     reorderWaypoints,
+    reloadPageImage,
+    updatePageTitle,
+    addPage,
+    removePage,
+    movePage,
     updateMeta,
-    reloadImage,
     updateAnnotationStyle,
+    updateTheme,
     save,
   } = useExhibitState(slug);
 
+  const [currentPageId, setCurrentPageId] = useState<string | undefined>();
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [previewing, setPreviewing] = useState(false);
   const canvasRef = useRef<AnnotationCanvasHandle>(null);
@@ -96,26 +109,29 @@ function ExhibitEditor({ slug }: { slug: string }) {
     setSelectedId(undefined);
     setPreviewing(false);
     setDrawArmed(false);
+    setCurrentPageId(undefined);
   }, [slug]);
 
   if (status === "loading") return <p className="editor-status">Loading…</p>;
   if (status === "error") return <p className="editor-status">Failed to load: {error}</p>;
   if (!exhibit) return null;
 
-  if (exhibit.image.width === 0) {
-    return (
-      <ImageImportForm
-        slug={slug}
-        onImported={(image) => reloadImage(image)}
-      />
-    );
-  }
+  const currentPage = exhibit.pages.find((p) => p.id === currentPageId) ?? exhibit.pages[0];
+  const pageIndex = exhibit.pages.findIndex((p) => p.id === currentPage.id);
 
-  const dziUrl = `/exhibits/${slug}/${exhibit.image.dziPath}`;
+  function handleBack() {
+    if (dirty && !window.confirm("You have unsaved changes. Leave without saving?")) {
+      return;
+    }
+    onBack();
+  }
 
   return (
     <div className="editor-layout">
       <header className="editor-header">
+        <button type="button" className="editor-header__back" onClick={handleBack}>
+          ← Exhibits
+        </button>
         <input
           className="editor-header__title"
           value={exhibit.title}
@@ -132,34 +148,109 @@ function ExhibitEditor({ slug }: { slug: string }) {
         </div>
       </header>
 
+      {!previewing && (
+        <div className="page-tabs">
+          {exhibit.pages.map((page, i) => (
+            <div
+              key={page.id}
+              className={`page-tabs__tab${page.id === currentPage.id ? " page-tabs__tab--active" : ""}`}
+              onClick={() => setCurrentPageId(page.id)}
+            >
+              <input
+                className="page-tabs__label"
+                value={page.title ?? ""}
+                placeholder={`Page ${i + 1}`}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => updatePageTitle(page.id, e.target.value)}
+              />
+              <button
+                type="button"
+                className="page-tabs__move"
+                disabled={i === 0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  movePage(page.id, -1);
+                }}
+                aria-label="Move page earlier"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                className="page-tabs__move"
+                disabled={i === exhibit.pages.length - 1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  movePage(page.id, 1);
+                }}
+                aria-label="Move page later"
+              >
+                ▶
+              </button>
+              <button
+                type="button"
+                className="page-tabs__delete"
+                disabled={exhibit.pages.length <= 1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removePage(page.id);
+                  if (currentPage.id === page.id) setCurrentPageId(undefined);
+                }}
+                aria-label="Delete page"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="page-tabs__add"
+            onClick={async () => setCurrentPageId(await addPage())}
+          >
+            ＋ Add page
+          </button>
+        </div>
+      )}
+
       {previewing ? (
         <ExhibitReader exhibit={exhibit} assetBase={`/exhibits/${slug}/`} />
+      ) : currentPage.image.width === 0 ? (
+        <ImageImportForm
+          slug={slug}
+          pageId={currentPage.id}
+          pageLabel={currentPage.title || `Page ${pageIndex + 1}`}
+          onImported={(image) => reloadPageImage(currentPage.id, image)}
+        />
       ) : (
         <div className="editor-body">
           <div className="editor-canvas">
             <AnnotationCanvas
+              key={currentPage.id}
               ref={canvasRef}
-              exhibitKey={slug}
-              dziUrl={dziUrl}
-              waypoints={exhibit.waypoints}
+              exhibitKey={`${slug}:${currentPage.id}`}
+              dziUrl={`/exhibits/${slug}/${currentPage.image.dziPath}`}
+              waypoints={currentPage.waypoints}
               focusId={selectedId}
               annotationStyle={exhibit.annotationStyle}
               drawingEnabled={drawingEnabled}
               onCreateRegion={(id, region) => {
-                addWaypoint(id, region);
+                addWaypoint(currentPage.id, id, region);
                 setSelectedId(id);
                 setDrawArmed(false);
               }}
-              onUpdateRegion={updateWaypointRegion}
-              onDeleteRegion={removeWaypoint}
+              onUpdateRegion={(id, region) => updateWaypointRegion(currentPage.id, id, region)}
+              onDeleteRegion={(id) => removeWaypoint(currentPage.id, id)}
               onSelect={setSelectedId}
             />
           </div>
           <div className="editor-sidebar">
-            <AnnotationStyleSettings
-              style={exhibit.annotationStyle}
-              onChange={updateAnnotationStyle}
-            />
+            <div className="editor-sidebar__sticky-settings">
+              <AnnotationStyleSettings
+                style={exhibit.annotationStyle}
+                onChange={updateAnnotationStyle}
+              />
+              <ThemeSettings theme={exhibit.theme} onChange={updateTheme} />
+            </div>
             <label className="editor-sidebar__label" htmlFor="exhibit-intro">
               Exhibit introduction
             </label>
@@ -172,23 +263,23 @@ function ExhibitEditor({ slug }: { slug: string }) {
               rows={3}
             />
             <WaypointPanel
-              waypoints={exhibit.waypoints}
+              waypoints={currentPage.waypoints}
               selectedId={selectedId}
               drawArmed={drawArmed}
               onToggleDraw={() => setDrawArmed((a) => !a)}
               onAddEntry={(kind) => {
-                const id = addEntry(kind);
+                const id = addEntry(currentPage.id, kind);
                 setSelectedId(id);
               }}
               onSelect={setSelectedId}
-              onChangeTitle={updateWaypointTitle}
-              onChangeBody={updateWaypointBody}
+              onChangeTitle={(id, title) => updateWaypointTitle(currentPage.id, id, title)}
+              onChangeBody={(id, body) => updateWaypointBody(currentPage.id, id, body)}
               onDelete={(id) => {
                 canvasRef.current?.removeAnnotation(id);
-                removeWaypoint(id);
+                removeWaypoint(currentPage.id, id);
                 if (selectedId === id) setSelectedId(undefined);
               }}
-              onReorder={reorderWaypoints}
+              onReorder={(orderedIds) => reorderWaypoints(currentPage.id, orderedIds)}
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { exhibitSchema } from "../src/viewer/schema.ts";
+import { exhibitSchema, migrateExhibitRaw } from "../src/viewer/schema.ts";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const exhibitsDir = path.join(rootDir, "exhibits");
@@ -20,7 +20,7 @@ const manifest = slugs.map((slug) => {
     throw new Error(`exhibits/${slug}/exhibit.json is missing or not valid JSON: ${err.message}`);
   }
 
-  const result = exhibitSchema.safeParse(raw);
+  const result = exhibitSchema.safeParse(migrateExhibitRaw(raw));
   if (!result.success) {
     throw new Error(
       `exhibits/${slug}/exhibit.json failed validation:\n${result.error.issues

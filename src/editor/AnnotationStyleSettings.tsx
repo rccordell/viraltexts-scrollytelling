@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { AnnotationStyle } from "../viewer/schema";
 import { defaultAnnotationStyle } from "../viewer/schema";
+import { normalizeHex } from "./colorUtils";
 
 interface AnnotationStyleSettingsProps {
   style: AnnotationStyle | undefined;
@@ -38,7 +39,7 @@ export function AnnotationStyleSettings({ style, onChange }: AnnotationStyleSett
             <div className="style-settings__row style-settings__row--indent">
               <input
                 type="color"
-                value={normalizeHex(current.borderColor)}
+                value={normalizeHex(current.borderColor, defaultAnnotationStyle.borderColor)}
                 onChange={(e) => set("borderColor", e.target.value)}
               />
               <label>
@@ -66,7 +67,7 @@ export function AnnotationStyleSettings({ style, onChange }: AnnotationStyleSett
             <div className="style-settings__row style-settings__row--indent">
               <input
                 type="color"
-                value={normalizeHex(current.fillColor)}
+                value={normalizeHex(current.fillColor, defaultAnnotationStyle.fillColor)}
                 onChange={(e) => set("fillColor", e.target.value)}
               />
               <label>
@@ -86,10 +87,4 @@ export function AnnotationStyleSettings({ style, onChange }: AnnotationStyleSett
       )}
     </div>
   );
-}
-
-// <input type="color"> requires a 6-digit hex value; fall back to the
-// default if a non-hex color (e.g. a named color or rgba()) was stored.
-function normalizeHex(color: string): string {
-  return /^#[0-9a-f]{6}$/i.test(color) ? color : defaultAnnotationStyle.borderColor;
 }

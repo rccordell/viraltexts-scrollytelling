@@ -19,5 +19,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "vite.editor.config.ts", "server/**/*.ts", "scripts/**/*.mjs"]
+  "include": [
+    "vite.config.ts",
+    "vite.editor.config.ts",
+    "vite.export.config.ts",
+    "server/**/*.ts",
+    "scripts/**/*.mjs"
+  ]
 }

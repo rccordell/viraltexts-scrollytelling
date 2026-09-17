@@ -12,8 +12,9 @@ export const api = {
   listExhibits: () =>
     fetch("/api/exhibits").then((r) => json<{ slug: string; title: string }[]>(r)),
 
-  getExhibit: (slug: string) =>
-    fetch(`/api/exhibits/${slug}`).then((r) => json<Exhibit>(r)),
+  // Raw disk shape may still be schemaVersion 1 — callers must run this
+  // through migrateExhibitRaw() before validating/using it as an Exhibit.
+  getExhibit: (slug: string) => fetch(`/api/exhibits/${slug}`).then((r) => json<unknown>(r)),
 
   saveExhibit: (slug: string, exhibit: Exhibit) =>
     fetch(`/api/exhibits/${slug}`, {
@@ -27,8 +28,8 @@ export const api = {
       json<{ ok: true }>(r),
     ),
 
-  importImage: (slug: string, sourcePath: string) =>
-    fetch(`/api/exhibits/${slug}/import-image`, {
+  importImage: (slug: string, pageId: string, sourcePath: string) =>
+    fetch(`/api/exhibits/${slug}/pages/${pageId}/import-image`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sourcePath }),

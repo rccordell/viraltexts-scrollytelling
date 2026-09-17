@@ -13,17 +13,26 @@ publish them.
 
 ## Status
 
-v1 complete:
+v1 + v2 complete:
 
 - [x] Deep-zoom viewer (OpenSeadragon) + DZI tiling pipeline (`sharp`)
 - [x] Shared `ExhibitReader` component: scroll-synced pan/zoom + click-to-jump
 - [x] Visual editor for drawing regions and attaching text (Annotorious)
-- [x] Love Letter exhibit content authored
+- [x] Headers and freestanding notes (narrative content with no linked region)
+- [x] Per-exhibit reader theme: font, colors, custom CSS
+- [x] Multi-page exhibits (each page its own image + waypoint list, with
+      Prev/Next navigation between them)
+- [x] Love Letter exhibit content authored (8 annotations across the page)
 - [x] Static build + deploy docs
+- [x] Standalone single-exhibit export (`npm run export`) for uploading one
+      exhibit to any host, independent of the multi-exhibit app
 
-v1 deliberately leaves out: accounts/multi-user editing, polygon regions
+Deliberately left out: accounts/multi-user editing, polygon regions
 (rectangles only — the schema is polygon-ready), drag-and-drop image upload
-(path-based import only), and a mobile-specific redesign.
+(path-based import only), a mobile-specific redesign, per-page URL
+deep-linking, drag-reorder of pages, per-page theme/style overrides, and any
+external font loading (the font picker is a curated system-font list, kept
+offline-friendly like the rest of the tool).
 
 ## Development
 
@@ -46,11 +55,16 @@ npm run edit
 Opens the visual editor at `http://localhost:5174/editor.html`. From there:
 
 1. Create a new exhibit (gives it a slug).
-2. Import a source image by path (see "Adding an image" below).
-3. Drag a rectangle on the image to create a waypoint; write its text in the
-   sidebar (markdown supported). Drag waypoint cards to reorder them.
-4. Click **Preview** at any time to see the live scrollytelling reader.
-5. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
+2. Import a source image by path (see "Adding an image" below) — the tab
+   bar above the canvas lets you add more pages, each with its own image.
+3. Click "＋ Draw a box" (or hold Option/Alt) to arm the draw tool, then
+   drag on the image to create a waypoint; write its text in the sidebar
+   (markdown supported). "＋ Header"/"＋ Note" add text entries with no
+   linked region. Drag cards to reorder.
+4. Use "Box appearance" and "Reader appearance" in the sidebar to set the
+   drawn-box style and the published reader's font/colors/custom CSS.
+5. Click **Preview** at any time to see the live scrollytelling reader.
+6. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
 
 The editor only runs locally during authoring — it's never part of the
 published site (see "How it's built" below).
@@ -82,3 +96,21 @@ required. If deploying to a GitHub Pages *project* page (e.g.
 
 `npm run preview` serves the built `dist/` folder locally, useful for
 verifying the production build before deploying.
+
+### Exporting a single exhibit
+
+```bash
+npm run export -- love-letter
+```
+
+Produces `export/love-letter/` — a completely standalone, self-contained
+build of *just that exhibit*: its own `index.html`, JS/CSS, and tiles, all
+referenced with relative paths. Unlike `npm run build` (which bundles every
+exhibit into one multi-exhibit app with hash routing), this folder has no
+dependency on a landing page or any other exhibit, and works when uploaded
+to any subdirectory of any static host — FTP, cPanel, Netlify's drop-zone,
+S3, etc. Just upload the contents of `export/<slug>/` and visit that URL.
+
+Use `npm run build` when you want one site hosting a collection of
+exhibits; use `npm run export` when you want to hand a single exhibit to a
+domain you don't control the whole deploy pipeline for.

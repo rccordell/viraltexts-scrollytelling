@@ -14,8 +14,10 @@
 .exhibit-reader__text {
   overflow-y: auto;
   padding: 3rem 2.5rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--exhibit-font, Georgia, "Times New Roman", serif);
   line-height: 1.6;
+  background: var(--exhibit-bg, #ffffff);
+  color: var(--exhibit-text, #222222);
 }
 
 .exhibit-reader__intro {
@@ -40,8 +42,8 @@
 }
 
 .waypoint-block--active {
-  border-left-color: #b8862b;
-  background: #faf6ee;
+  border-left-color: var(--exhibit-accent, #b8862b);
+  background: color-mix(in srgb, var(--exhibit-accent, #b8862b) 8%, var(--exhibit-bg, #ffffff));
 }
 
 .waypoint-heading {
@@ -54,7 +56,33 @@
 }
 
 .waypoint-heading--active {
-  border-left-color: #b8862b;
+  border-left-color: var(--exhibit-accent, #b8862b);
+}
+
+.exhibit-reader__page-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+.exhibit-reader__page-nav button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+
+.exhibit-reader__page-nav button:disabled {
+  visibility: hidden;
 }
 
 .exhibit-reader__credits {

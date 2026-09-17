@@ -103,21 +103,31 @@ export function editorApiPlugin(): Plugin {
               return sendJson(res, 409, { error: "Exhibit already exists" });
             }
             await writeJsonAtomic(p, {
-              schemaVersion: 1,
+              schemaVersion: 2,
               slug,
               title: slug,
-              waypoints: [],
-              image: { dziPath: "tiles.dzi", width: 0, height: 0, tileSize: 256, overlap: 1 },
+              pages: [
+                {
+                  id: "page-1",
+                  waypoints: [],
+                  image: { dziPath: "tiles.dzi", width: 0, height: 0, tileSize: 256, overlap: 1 },
+                },
+              ],
             });
             return sendJson(res, 201, { ok: true });
           }
 
-          // POST /api/exhibits/:slug/import-image  { sourcePath: string }
+          // POST /api/exhibits/:slug/pages/:pageId/import-image  { sourcePath: string }
           if (
-            segments.length === 2 &&
-            action === "import-image" &&
+            segments.length === 4 &&
+            segments[1] === "pages" &&
+            segments[3] === "import-image" &&
             method === "POST"
           ) {
+            const pageId = segments[2];
+            if (!isValidSlug(pageId)) {
+              return sendJson(res, 400, { error: "Invalid page id" });
+            }
             const body = (await readBody(req)) as { sourcePath?: string };
             if (!body.sourcePath) {
               return sendJson(res, 400, { error: "sourcePath is required" });
@@ -128,24 +138,46 @@ export function editorApiPlugin(): Plugin {
                 error: `Source image not found: ${body.sourcePath}`,
               });
             }
-            const outDir = path.join(EXHIBITS_DIR, slug);
-            const result = await generateDziTiles(sourcePath, outDir);
 
             const p = exhibitPath(slug);
-            const existing = existsSync(p)
-              ? await readJson<Record<string, unknown>>(p)
-              : { schemaVersion: 1, slug, title: slug, waypoints: [] };
-            await writeJsonAtomic(p, {
+            if (!existsSync(p)) {
+              return sendJson(res, 404, { error: "Exhibit not found" });
+            }
+            const existing = await readJson<{ pages?: { id: string }[] }>(p);
+            if (!existing.pages?.some((page) => page.id === pageId)) {
+              return sendJson(res, 404, { error: "Page not found" });
+            }
+
+            // Legacy page-1 (migrated from a v1 exhibit, or created via
+            // POST .../create above) keeps its flat exhibits/<slug>/ layout;
+            // every other page tiles into its own pages/<pageId>/ folder.
+            const outDir =
+              pageId === "page-1"
+                ? path.join(EXHIBITS_DIR, slug)
+                : path.join(EXHIBITS_DIR, slug, "pages", pageId);
+            const result = await generateDziTiles(sourcePath, outDir);
+            const dziPath =
+              pageId === "page-1" ? result.dziPath : path.posix.join("pages", pageId, result.dziPath);
+
+            const updated = {
               ...existing,
-              image: {
-                dziPath: result.dziPath,
-                width: result.width,
-                height: result.height,
-                tileSize: 256,
-                overlap: 1,
-              },
-            });
-            return sendJson(res, 200, { ok: true, ...result });
+              pages: existing.pages!.map((page) =>
+                page.id === pageId
+                  ? {
+                      ...page,
+                      image: {
+                        dziPath,
+                        width: result.width,
+                        height: result.height,
+                        tileSize: 256,
+                        overlap: 1,
+                      },
+                    }
+                  : page,
+              ),
+            };
+            await writeJsonAtomic(p, updated);
+            return sendJson(res, 200, { ok: true, width: result.width, height: result.height, dziPath });
           }
 
           return next();
