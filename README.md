@@ -75,7 +75,11 @@ Opens the visual editor at `http://localhost:5174/editor.html`. From there:
    existing only as a jump target), click **Copy link** on that card to
    copy `[](#its-id)`, then add a "＋ Prose" block and paste that into the
    flowing text, filling in the link text between the brackets:
-   `[the phrase](#its-id)`.
+   `[the phrase](#its-id)`. In the reader, hovering a linked phrase pans to
+   it too (not just clicking) — the cursor changes to a zoom icon over one
+   as a hint, but for exhibits with many closely-linked phrases it can be
+   worth adding a line to the intro like "Hover or click an underlined
+   phrase to see it on the image" for readers unfamiliar with the pattern.
 5. For an aside tied to one spot on the image that shouldn't be part of the
    scrolling text at all, click "＋ Draw a note" and drag on the image.
    A note's region stays invisible until a reader's mouse is over it, then

@@ -31,13 +31,29 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
   const textRef = useRef<HTMLDivElement>(null);
 
   const onActivate = useCallback((id: string) => setActiveId(id), []);
-  const { registerBlock, jumpTo: rawJumpTo } = useScrollSync({ onActivate });
+  const { registerBlock, jumpTo: rawJumpTo, markActive } = useScrollSync({
+    onActivate,
+    scrollContainerRef: textRef,
+  });
   const jumpTo = useCallback(
     (id: string) => {
       setFlightNonce((n) => n + 1);
       rawJumpTo(id);
     },
     [rawJumpTo],
+  );
+  // Like jumpTo, but for hovering a linked phrase rather than clicking it —
+  // pans the image without scrolling the text (the reader is already
+  // looking right at it). Also marks it active with the scroll-sync hook
+  // itself, so it stays the pick even if several waypoints (e.g. a few
+  // links on the same line) are all in view at once.
+  const hoverTo = useCallback(
+    (id: string) => {
+      setFlightNonce((n) => n + 1);
+      markActive(id);
+      setActiveId(id);
+    },
+    [markActive],
   );
 
   useEffect(() => {
@@ -97,6 +113,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
                 activeId={activeId}
                 registerBlock={registerBlock}
                 onJumpTo={jumpTo}
+                onHoverTo={hoverTo}
               />
             );
           }

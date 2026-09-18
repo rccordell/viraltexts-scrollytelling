@@ -68,9 +68,16 @@
 }
 
 .prose-anchor {
-  cursor: pointer;
+  /* The zoom-in cursor (the same one browsers use for "click to enlarge an
+     image") hints that this text does something to the image, before the
+     reader has ever hovered or clicked one. No separate instant hover
+     style beyond this — with several links close together, raw CSS
+     :hover flickers between them as the mouse's hit-testing alternates at
+     the shared boundary; the --active state below (reached only once the
+     hover settles) is the only visual feedback, same as a real click. */
+  cursor: zoom-in;
   border-bottom: 1px dotted var(--exhibit-accent, #b8862b);
-  transition: background 0.2s ease;
+  transition: background 0.15s ease;
 }
 
 .prose-anchor--active {
