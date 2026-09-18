@@ -116,10 +116,15 @@ export function useScrollSync({ onActivate, scrollContainerRef }: ScrollSyncOpti
   }
 
   function jumpTo(id: string) {
-    const el = blocksRef.current.get(id);
-    if (!el) return;
     activeIdRef.current = id;
     onActivate(id);
+
+    // Some ids (e.g. a note, referenced only via its image region) never
+    // register a scrollable text block — there's nothing to scroll to, but
+    // it should still activate (panning/zooming the image, opening a
+    // note's popup, etc., same as hovering it would).
+    const el = blocksRef.current.get(id);
+    if (!el) return;
 
     if (pendingScrollEndCleanupRef.current) pendingScrollEndCleanupRef.current();
 

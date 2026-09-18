@@ -8,6 +8,7 @@ import { useScrollSync } from "./scrollSync";
 import { WaypointBlock } from "./WaypointBlock";
 import { ProseBlock } from "./ProseBlock";
 import { NoteHotspots } from "./NoteHotspots";
+import { NotePanel } from "./NotePanel";
 import { ActiveRegionHighlight } from "./ActiveRegionHighlight";
 import "./ExhibitReader.css";
 
@@ -88,13 +89,20 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
   const activeWaypoint = page.waypoints.find((w) => w.id === activeId);
   const activeRegion = activeWaypoint?.region ?? null;
   const activeStyle = activeWaypoint?.style ?? boxDefaultStyle;
+  const activeNote =
+    activeWaypoint?.kind === "note" && activeWaypoint.region
+      ? (activeWaypoint as Waypoint & { region: Region })
+      : null;
 
   return (
     <div className="exhibit-reader" style={themeVars}>
       {theme.customCss && <style>{theme.customCss}</style>}
-      <div className="exhibit-reader__viewer" ref={containerRef} />
+      <div className="exhibit-reader__viewer-col">
+        <div className="exhibit-reader__viewer" ref={containerRef} />
+        <NotePanel note={activeNote} flightNonce={flightNonce} />
+      </div>
       <ActiveRegionHighlight viewer={viewer} region={activeRegion} style={activeStyle} />
-      <NoteHotspots viewer={viewer} notes={notes} defaultStyle={boxDefaultStyle} />
+      <NoteHotspots viewer={viewer} notes={notes} defaultStyle={boxDefaultStyle} onSelect={jumpTo} />
       <div className="exhibit-reader__text" ref={textRef}>
         {pageIndex === 0 && exhibit.intro && (
           <div className="exhibit-reader__intro">

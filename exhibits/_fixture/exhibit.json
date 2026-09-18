@@ -54,7 +54,7 @@
           "kind": "prose",
           "zoomPadding": 0.15,
           "title": "Inline references",
-          "body": "This paragraph is testing inline references rather than whole blocks. Here's a mention of the [green box in the bottom-left](#wp-c), woven right into a sentence, and a bit further along the [purple box in the bottom-right](#wp-d) gets its own aside. There's also a [real external link](https://example.com) to confirm normal links still behave normally."
+          "body": "This paragraph is testing inline references rather than whole blocks. Here's a mention of the [green box in the bottom-left](#wp-c), woven right into a sentence, and a bit further along the [purple box in the bottom-right](#wp-d) gets its own aside. There's also a [real external link](https://example.com) to confirm normal links still behave normally, and a [reference to the popup note](#note-a) to confirm linking to a note from prose opens its popup too."
         },
         {
           "id": "note-a",
@@ -63,6 +63,14 @@
           "zoomPadding": 0.15,
           "title": "A popup note",
           "body": "This is a **note** — click its marker on the image to reveal this text. It doesn't move the image and never appears in the scrolling text on the right."
+        },
+        {
+          "id": "note-wide",
+          "kind": "note",
+          "region": { "type": "rect", "x": 1000, "y": 1000, "width": 1400, "height": 90 },
+          "zoomPadding": 0.15,
+          "title": "A wide note",
+          "body": "A wide, short box — fitting it (plus padding) into a roughly square viewer pane leaves a lot of empty space above and below, pushing the box (and this popup's anchor point) well down from the top. Tests that the popup flips to the box's bottom edge instead of running off the bottom of the pane on a short viewport."
         }
       ]
     },

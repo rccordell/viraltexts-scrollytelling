@@ -19,8 +19,9 @@ v1 + v2 complete:
 - [x] Shared `ExhibitReader` component: scroll-synced pan/zoom + click-to-jump
 - [x] Visual editor for drawing regions and attaching text (Annotorious)
 - [x] Headers and freestanding prose (narrative content with no linked region)
-- [x] Popup notes: a small clickable marker on a specific spot of the image
-      that reveals its text on click, independent of the scrolling text
+- [x] Notes: a region on the image that highlights on hover and, on click
+      (directly or via an inline prose link), shows its text in a fixed
+      panel docked to the image, independent of the scrolling text
 - [x] Per-exhibit reader theme: font, colors, custom CSS
 - [x] Multi-page exhibits (each page its own image + waypoint list, with
       Prev/Next navigation between them)
@@ -83,9 +84,9 @@ Opens the visual editor at `http://localhost:5174/editor.html`. From there:
 5. For an aside tied to one spot on the image that shouldn't be part of the
    scrolling text at all, click "＋ Draw a note" and drag on the image.
    A note's region stays invisible until a reader's mouse is over it, then
-   highlights; clicking it pans/zooms to that region and pops up the note's
-   text beside
-   it, independent of the reader's scroll position.
+   highlights; clicking it (or an inline prose link to it) pans/zooms to
+   that region and shows the note's text in a panel docked to the bottom
+   of the image, independent of the reader's scroll position.
 6. Use "Box appearance" and "Reader appearance" in the sidebar to set the
    exhibit-wide drawn-box style and the published reader's font/colors/
    custom CSS. Any single waypoint or note can override this — check

@@ -4,10 +4,15 @@
   height: 100vh;
 }
 
-.exhibit-reader__viewer {
+.exhibit-reader__viewer-col {
   position: sticky;
   top: 0;
   height: 100vh;
+}
+
+.exhibit-reader__viewer {
+  width: 100%;
+  height: 100%;
   background: #1a1a1a;
 }
 
@@ -140,11 +145,13 @@
 
 /* On devices that can hover, the box stays invisible until the mouse comes
    close to (over) it, so it doesn't clutter the image; touch devices have
-   no "near the mouse" signal, so it stays visible there. */
+   no "near the mouse" signal, so it stays visible there. Whether the box
+   is the *active* one is shown by ActiveRegionHighlight instead (the same
+   generic "here's what's active" outline every waypoint kind uses), not
+   by this hover-only highlight. */
 @media (hover: hover) {
   .note-region:hover,
-  .note-region:focus-visible,
-  .note-region--open {
+  .note-region:focus-visible {
     border-color: var(--box-border-color, #b8862b);
     background: var(--box-fill, rgba(184, 134, 43, 0.15));
   }
@@ -157,63 +164,57 @@
   }
 }
 
-.note-region__popup {
+/* Docked to the bottom of the image viewer column — deliberately not
+   positioned relative to the note's box on the image, which (across a
+   note's own bounding box, the scrolling text column beside it, and the
+   window itself) turned out to have no position that couldn't run off
+   one edge or another for some box shape or viewport size. */
+.note-panel {
   position: absolute;
-  top: 0;
-  width: 220px;
-  max-height: 260px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 40%;
   overflow-y: auto;
-  padding: 0.75rem 1.5rem 0.75rem 0.85rem;
+  padding: 1rem 2.25rem 1rem 1.25rem;
   background: var(--exhibit-bg, #faf6ee);
   color: var(--exhibit-text, #2a2318);
   font-family: var(--exhibit-font, Georgia, "Times New Roman", serif);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   line-height: 1.5;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
   z-index: 20;
-  cursor: default;
 }
 
-.note-region__popup--right {
-  left: 100%;
-  margin-left: 8px;
-}
-
-.note-region__popup--left {
-  right: 100%;
-  margin-right: 8px;
-}
-
-.note-region__popup h4 {
+.note-panel h4 {
   margin: 0 0 0.35rem;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
-.note-region__popup p {
+.note-panel p {
   margin: 0 0 0.5rem;
 }
 
-.note-region__popup p:last-child {
+.note-panel p:last-child {
   margin-bottom: 0;
 }
 
-.note-hotspot__close {
+.note-panel__close {
   position: absolute;
-  top: 2px;
-  right: 6px;
+  top: 0.6rem;
+  right: 0.75rem;
   padding: 0;
   background: transparent;
   border: none;
   color: inherit;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1;
   opacity: 0.6;
   cursor: pointer;
 }
 
-.note-hotspot__close:hover {
+.note-panel__close:hover {
   opacity: 1;
 }
 
@@ -230,7 +231,7 @@
     grid-template-columns: 1fr;
     height: auto;
   }
-  .exhibit-reader__viewer {
+  .exhibit-reader__viewer-col {
     position: relative;
     height: 60vh;
   }

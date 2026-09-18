@@ -11,8 +11,11 @@ interface ProseBlockProps {
 }
 
 // How long the mouse has to settle on one linked phrase — with no further
-// hover changes — before it pans the image.
-const HOVER_SETTLE_MS = 350;
+// hover changes — before it pans the image. Long enough that briefly
+// passing over a link while aiming the cursor at a different one nearby
+// (or at a link inside the note panel's own text) doesn't register as a
+// deliberate hover.
+const HOVER_SETTLE_MS = 550;
 
 /**
  * A long-form text block whose markdown can contain inline links like
