@@ -152,10 +152,18 @@ export function useScrollSync({ onActivate, scrollContainerRef }: ScrollSyncOpti
   }
 
   /** Marks a waypoint active without scrolling to it (e.g. a hover-settle
-   * on an inline link) — still needs to register as the "current" pick so
-   * the stickiness check above holds it once the observer next fires. */
+   * on an inline link). Hovering can target anything currently visible on
+   * screen, not just whatever's within the observer's narrow center-band
+   * tracking area — so unlike a scroll-driven pick, a hover pick is often
+   * *not* in `intersectingRef` at all, meaning the stickiness check above
+   * wouldn't protect it from a stray/delayed observer callback (e.g. one
+   * still trickling in from an earlier scroll) immediately reverting it
+   * back to whatever's in that band. A brief suppression window — the same
+   * idea as jumpTo's, just time-based since there's no scroll to wait out —
+   * gives the hover pick a moment to actually stick. */
   function markActive(id: string) {
     activeIdRef.current = id;
+    suppressUntilRef.current = Date.now() + 500;
   }
 
   return { registerBlock, jumpTo, markActive };
