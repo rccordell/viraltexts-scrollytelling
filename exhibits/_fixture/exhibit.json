@@ -55,6 +55,14 @@
           "zoomPadding": 0.15,
           "title": "Inline references",
           "body": "This paragraph is testing inline references rather than whole blocks. Here's a mention of the [green box in the bottom-left](#wp-c), woven right into a sentence, and a bit further along the [purple box in the bottom-right](#wp-d) gets its own aside. There's also a [real external link](https://example.com) to confirm normal links still behave normally."
+        },
+        {
+          "id": "note-a",
+          "kind": "note",
+          "region": { "type": "rect", "x": 2500, "y": 100, "width": 150, "height": 150 },
+          "zoomPadding": 0.15,
+          "title": "A popup note",
+          "body": "This is a **note** — click its marker on the image to reveal this text. It doesn't move the image and never appears in the scrolling text on the right."
         }
       ]
     },

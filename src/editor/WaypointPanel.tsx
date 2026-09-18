@@ -14,17 +14,23 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Waypoint } from "../viewer/schema";
+import type { AnnotationStyle, Waypoint } from "../viewer/schema";
+import { defaultAnnotationStyle } from "../viewer/schema";
+import { AnnotationStyleFields } from "./AnnotationStyleSettings";
 
 interface WaypointPanelProps {
   waypoints: Waypoint[];
   selectedId?: string;
-  drawArmed: boolean;
-  onToggleDraw: () => void;
-  onAddEntry: (kind: "header" | "note" | "prose") => void;
+  drawMode: "waypoint" | "note" | null;
+  /** The exhibit-wide "Box appearance" — the starting point offered when an
+   * author turns on a custom style for one box. */
+  exhibitDefaultStyle: AnnotationStyle | undefined;
+  onToggleDraw: (mode: "waypoint" | "note") => void;
+  onAddEntry: (kind: "header" | "prose") => void;
   onSelect: (id: string) => void;
   onChangeTitle: (id: string, title: string) => void;
   onChangeBody: (id: string, body: string) => void;
+  onChangeStyle: (id: string, style: AnnotationStyle | undefined) => void;
   onDelete: (id: string) => void;
   onReorder: (orderedIds: string[]) => void;
 }
@@ -32,12 +38,14 @@ interface WaypointPanelProps {
 export function WaypointPanel({
   waypoints,
   selectedId,
-  drawArmed,
+  drawMode,
+  exhibitDefaultStyle,
   onToggleDraw,
   onAddEntry,
   onSelect,
   onChangeTitle,
   onChangeBody,
+  onChangeStyle,
   onDelete,
   onReorder,
 }: WaypointPanelProps) {
@@ -54,20 +62,27 @@ export function WaypointPanel({
   return (
     <div className="waypoint-panel">
       <div className="waypoint-panel__toolbar">
-        <button
-          type="button"
-          className={`waypoint-panel__draw-toggle${drawArmed ? " waypoint-panel__draw-toggle--active" : ""}`}
-          onClick={onToggleDraw}
-          title="Or hold Option/Alt to draw temporarily"
-        >
-          {drawArmed ? "✛ Drawing… drag on the image" : "＋ Draw a box"}
-        </button>
+        <div className="waypoint-panel__draw-buttons">
+          <button
+            type="button"
+            className={`waypoint-panel__draw-toggle${drawMode === "waypoint" ? " waypoint-panel__draw-toggle--active" : ""}`}
+            onClick={() => onToggleDraw("waypoint")}
+            title="Or hold Option/Alt to draw temporarily"
+          >
+            {drawMode === "waypoint" ? "✛ Drawing… drag on the image" : "＋ Draw a waypoint"}
+          </button>
+          <button
+            type="button"
+            className={`waypoint-panel__draw-toggle${drawMode === "note" ? " waypoint-panel__draw-toggle--active" : ""}`}
+            onClick={() => onToggleDraw("note")}
+            title="A small popup marker on the image, not part of the scrolling text"
+          >
+            {drawMode === "note" ? "✛ Drawing… drag on the image" : "＋ Draw a note"}
+          </button>
+        </div>
         <div className="waypoint-panel__toolbar-secondary">
           <button type="button" onClick={() => onAddEntry("header")}>
             ＋ Header
-          </button>
-          <button type="button" onClick={() => onAddEntry("note")}>
-            ＋ Note
           </button>
           <button type="button" onClick={() => onAddEntry("prose")}>
             ＋ Prose
@@ -77,8 +92,10 @@ export function WaypointPanel({
 
       {waypoints.length === 0 ? (
         <p className="waypoint-panel__empty">
-          Nothing here yet. Draw a box on the image, or add a header or note
-          for text that isn't tied to a specific spot.
+          Nothing here yet. Draw a waypoint to link an image region from the
+          scrolling text, draw a note for a click-to-reveal popup on the
+          image, or add a header or prose block for text that isn't tied to
+          a specific spot.
         </p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -89,9 +106,11 @@ export function WaypointPanel({
                   key={w.id}
                   waypoint={w}
                   selected={w.id === selectedId}
+                  exhibitDefaultStyle={exhibitDefaultStyle}
                   onSelect={() => onSelect(w.id)}
                   onChangeTitle={(title) => onChangeTitle(w.id, title)}
                   onChangeBody={(body) => onChangeBody(w.id, body)}
+                  onChangeStyle={(style) => onChangeStyle(w.id, style)}
                   onDelete={() => onDelete(w.id)}
                 />
               ))}
@@ -106,16 +125,18 @@ export function WaypointPanel({
 interface CardProps {
   waypoint: Waypoint;
   selected: boolean;
+  exhibitDefaultStyle: AnnotationStyle | undefined;
   onSelect: () => void;
   onChangeTitle: (title: string) => void;
   onChangeBody: (body: string) => void;
+  onChangeStyle: (style: AnnotationStyle | undefined) => void;
   onDelete: () => void;
 }
 
 const KIND_LABEL: Record<Waypoint["kind"], string | null> = {
   waypoint: null,
   header: "Header",
-  note: "Note",
+  note: "Note (popup)",
   prose: "Prose",
 };
 
@@ -136,20 +157,37 @@ const UNTITLED_LABEL: Record<Waypoint["kind"], string> = {
 const BODY_PLACEHOLDER: Record<Waypoint["kind"], string> = {
   waypoint: "Write the text for this passage (markdown supported)…",
   header: "",
-  note: "Write the text for this passage (markdown supported)…",
+  note: "Text shown in the popup when this spot on the image is clicked (markdown supported)…",
   prose:
     "Write a long passage of text here. Link a word or phrase to a region " +
     "with [phrase](#region-id) — click \"Copy link\" on a waypoint card " +
     "above to get its id, then paste and fill in the link text.",
 };
 
-function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onChangeBody, onDelete }: CardProps) {
+function SortableWaypointCard({
+  waypoint,
+  selected,
+  exhibitDefaultStyle,
+  onSelect,
+  onChangeTitle,
+  onChangeBody,
+  onChangeStyle,
+  onDelete,
+}: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: waypoint.id,
   });
   const elRef = useRef<HTMLLIElement | null>(null);
   const kindLabel = KIND_LABEL[waypoint.kind];
   const [justCopied, setJustCopied] = useState(false);
+
+  // A freshly-drawn waypoint might only ever be referenced from inline
+  // prose (via its "Copy link"), never given its own title/body — so its
+  // text fields stay collapsed behind a choice until the author explicitly
+  // asks for them, or it already has content (e.g. loaded from disk).
+  const hasContent = Boolean(waypoint.title?.trim()) || Boolean(waypoint.body?.trim());
+  const [wantsText, setWantsText] = useState(hasContent);
+  const showTextFields = waypoint.kind !== "waypoint" || wantsText || hasContent;
 
   useEffect(() => {
     if (selected) elRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -180,7 +218,7 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
           ⠿
         </span>
         {kindLabel && <span className="waypoint-card__kind-badge">{kindLabel}</span>}
-        {selected ? (
+        {selected && showTextFields ? (
           <input
             className="waypoint-card__title"
             placeholder={TITLE_PLACEHOLDER[waypoint.kind]}
@@ -189,12 +227,16 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
             onClick={(e) => e.stopPropagation()}
             autoFocus
           />
+        ) : selected ? (
+          <span className="waypoint-card__title-display waypoint-card__title-display--muted">
+            Region only — not linked to any text yet
+          </span>
         ) : (
           <span className="waypoint-card__title-display">
             {waypoint.title?.trim() || UNTITLED_LABEL[waypoint.kind]}
           </span>
         )}
-        {selected && waypoint.kind === "waypoint" && (
+        {selected && (waypoint.kind === "waypoint" || waypoint.kind === "note") && (
           <button
             type="button"
             className="waypoint-card__copy-link"
@@ -216,7 +258,7 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
           ✕
         </button>
       </div>
-      {selected && waypoint.kind !== "header" && (
+      {selected && waypoint.kind !== "header" && showTextFields && (
         <textarea
           className="waypoint-card__body"
           placeholder={BODY_PLACEHOLDER[waypoint.kind]}
@@ -225,6 +267,41 @@ function SortableWaypointCard({ waypoint, selected, onSelect, onChangeTitle, onC
           onClick={(e) => e.stopPropagation()}
           rows={waypoint.kind === "prose" ? 10 : 4}
         />
+      )}
+      {selected && waypoint.kind === "waypoint" && !showTextFields && (
+        <div className="waypoint-card__choice">
+          <p className="waypoint-card__choice-hint">
+            Link this region from a word or phrase in a Prose block above (use
+            "Copy link"), or give this waypoint its own text.
+          </p>
+          <button
+            type="button"
+            className="waypoint-card__choice-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setWantsText(true);
+            }}
+          >
+            ＋ Add waypoint text
+          </button>
+        </div>
+      )}
+      {selected && (waypoint.kind === "waypoint" || waypoint.kind === "note") && (
+        <div className="waypoint-card__style-override" onClick={(e) => e.stopPropagation()}>
+          <label className="waypoint-card__style-override-toggle">
+            <input
+              type="checkbox"
+              checked={!!waypoint.style}
+              onChange={(e) =>
+                onChangeStyle(e.target.checked ? (exhibitDefaultStyle ?? defaultAnnotationStyle) : undefined)
+              }
+            />
+            Custom box color for this one
+          </label>
+          {waypoint.style && (
+            <AnnotationStyleFields style={waypoint.style} onChange={onChangeStyle} />
+          )}
+        </div>
       )}
     </li>
   );

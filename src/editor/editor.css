@@ -253,8 +253,13 @@ body {
   margin-bottom: 1rem;
 }
 
+.waypoint-panel__draw-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .waypoint-panel__draw-toggle {
-  width: 100%;
+  flex: 1;
   padding: 0.6rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -314,9 +319,12 @@ body {
   box-shadow: 0 0 0 1px #fbbf24;
 }
 
-.waypoint-card--header,
-.waypoint-card--note {
+.waypoint-card--header {
   border-style: dashed;
+}
+
+.waypoint-card--note {
+  border-left: 3px solid #38bdf8;
 }
 
 .waypoint-card__kind-badge {
@@ -360,6 +368,12 @@ body {
   white-space: nowrap;
 }
 
+.waypoint-card__title-display--muted {
+  font-weight: 400;
+  font-style: italic;
+  color: #999;
+}
+
 .waypoint-card__delete {
   background: transparent;
   border: none;
@@ -388,4 +402,42 @@ body {
   padding: 0.5rem;
   font-family: inherit;
   resize: vertical;
+}
+
+.waypoint-card__choice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.waypoint-card__choice-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.waypoint-card__choice-button {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px dashed #3a3a40;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.waypoint-card__style-override {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #3a3a40;
+}
+
+.waypoint-card__style-override-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #ccc;
+  cursor: pointer;
 }

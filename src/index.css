@@ -10,10 +10,18 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  height: 100%;
+  /* Every layout here (the reader's sticky image column, the editor's
+     fixed-height shell) manages its own internal scrolling; without this,
+     a deep scrollIntoView() (e.g. jumping to a waypoint far down the text)
+     can spill into scrolling the window itself, breaking `position: sticky`
+     tracking for the image viewer. */
+  overflow: hidden;
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh;
 }

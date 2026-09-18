@@ -59,6 +59,7 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
     updateWaypointRegion,
     updateWaypointBody,
     updateWaypointTitle,
+    updateWaypointStyle,
     removeWaypoint,
     reorderWaypoints,
     reloadPageImage,
@@ -79,11 +80,12 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
 
   // Dragging pans the image by default (so you can navigate around while
   // zoomed in); drawing a new box requires explicitly arming it, either via
-  // the toolbar button (sticky until you draw or toggle it off) or by
-  // holding Option/Alt (a temporary override while held).
-  const [drawArmed, setDrawArmed] = useState(false);
+  // a toolbar button (sticky until you draw or toggle it off, and picks
+  // which kind of entry the box becomes) or by holding Option/Alt (a
+  // temporary override while held, which always draws a waypoint).
+  const [drawMode, setDrawMode] = useState<"waypoint" | "note" | null>(null);
   const [altHeld, setAltHeld] = useState(false);
-  const drawingEnabled = drawArmed || altHeld;
+  const drawingEnabled = drawMode !== null || altHeld;
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -108,7 +110,7 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
   useEffect(() => {
     setSelectedId(undefined);
     setPreviewing(false);
-    setDrawArmed(false);
+    setDrawMode(null);
     setCurrentPageId(undefined);
   }, [slug]);
 
@@ -234,9 +236,9 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
               annotationStyle={exhibit.annotationStyle}
               drawingEnabled={drawingEnabled}
               onCreateRegion={(id, region) => {
-                addWaypoint(currentPage.id, id, region);
+                addWaypoint(currentPage.id, id, region, drawMode ?? "waypoint");
                 setSelectedId(id);
-                setDrawArmed(false);
+                setDrawMode(null);
               }}
               onUpdateRegion={(id, region) => updateWaypointRegion(currentPage.id, id, region)}
               onDeleteRegion={(id) => removeWaypoint(currentPage.id, id)}
@@ -245,11 +247,11 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
           </div>
           <div className="editor-sidebar">
             <div className="editor-sidebar__sticky-settings">
+              <ThemeSettings theme={exhibit.theme} onChange={updateTheme} />
               <AnnotationStyleSettings
                 style={exhibit.annotationStyle}
                 onChange={updateAnnotationStyle}
               />
-              <ThemeSettings theme={exhibit.theme} onChange={updateTheme} />
             </div>
             <label className="editor-sidebar__label" htmlFor="exhibit-intro">
               Exhibit introduction
@@ -265,8 +267,9 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
             <WaypointPanel
               waypoints={currentPage.waypoints}
               selectedId={selectedId}
-              drawArmed={drawArmed}
-              onToggleDraw={() => setDrawArmed((a) => !a)}
+              drawMode={drawMode}
+              exhibitDefaultStyle={exhibit.annotationStyle}
+              onToggleDraw={(mode) => setDrawMode((m) => (m === mode ? null : mode))}
               onAddEntry={(kind) => {
                 const id = addEntry(currentPage.id, kind);
                 setSelectedId(id);
@@ -274,6 +277,7 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
               onSelect={setSelectedId}
               onChangeTitle={(id, title) => updateWaypointTitle(currentPage.id, id, title)}
               onChangeBody={(id, body) => updateWaypointBody(currentPage.id, id, body)}
+              onChangeStyle={(id, style) => updateWaypointStyle(currentPage.id, id, style)}
               onDelete={(id) => {
                 canvasRef.current?.removeAnnotation(id);
                 removeWaypoint(currentPage.id, id);

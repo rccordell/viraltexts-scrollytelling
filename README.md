@@ -18,7 +18,9 @@ v1 + v2 complete:
 - [x] Deep-zoom viewer (OpenSeadragon) + DZI tiling pipeline (`sharp`)
 - [x] Shared `ExhibitReader` component: scroll-synced pan/zoom + click-to-jump
 - [x] Visual editor for drawing regions and attaching text (Annotorious)
-- [x] Headers and freestanding notes (narrative content with no linked region)
+- [x] Headers and freestanding prose (narrative content with no linked region)
+- [x] Popup notes: a small clickable marker on a specific spot of the image
+      that reveals its text on click, independent of the scrolling text
 - [x] Per-exhibit reader theme: font, colors, custom CSS
 - [x] Multi-page exhibits (each page its own image + waypoint list, with
       Prev/Next navigation between them)
@@ -60,21 +62,33 @@ Opens the visual editor at `http://localhost:5174/editor.html`. From there:
 1. Create a new exhibit (gives it a slug).
 2. Import a source image by path (see "Adding an image" below) — the tab
    bar above the canvas lets you add more pages, each with its own image.
-3. Click "＋ Draw a box" (or hold Option/Alt) to arm the draw tool, then
-   drag on the image to create a waypoint; write its text in the sidebar
-   (markdown supported). "＋ Header"/"＋ Note" add text entries with no
-   linked region. Drag cards to reorder.
+3. Click "＋ Draw a waypoint" (or hold Option/Alt) to arm the draw tool,
+   then drag on the image to create a waypoint. Its card offers a choice:
+   **Copy link** (for referencing the region from prose, see point 4) or
+   **＋ Add waypoint text**, which reveals a title/body to make it its own
+   block in the sidebar (markdown supported). "＋ Header" adds a subhead
+   with no linked region; "＋ Prose" adds a long-form text block, also with
+   no region of its own (see point 4). Drag cards to reorder.
 4. For a word or phrase *inside* a longer passage to pan/zoom the image —
-   rather than a whole separate block — draw the region as a waypoint but
-   leave its title and body empty (it becomes invisible in the reader,
+   rather than a whole separate block — draw a waypoint and leave it as a
+   region only (skip "Add waypoint text"; it stays invisible in the reader,
    existing only as a jump target), click **Copy link** on that card to
    copy `[](#its-id)`, then add a "＋ Prose" block and paste that into the
    flowing text, filling in the link text between the brackets:
    `[the phrase](#its-id)`.
-5. Use "Box appearance" and "Reader appearance" in the sidebar to set the
-   drawn-box style and the published reader's font/colors/custom CSS.
-6. Click **Preview** at any time to see the live scrollytelling reader.
-7. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
+5. For an aside tied to one spot on the image that shouldn't be part of the
+   scrolling text at all, click "＋ Draw a note" and drag on the image.
+   A note's region stays invisible until a reader's mouse is over it, then
+   highlights; clicking it pans/zooms to that region and pops up the note's
+   text beside
+   it, independent of the reader's scroll position.
+6. Use "Box appearance" and "Reader appearance" in the sidebar to set the
+   exhibit-wide drawn-box style and the published reader's font/colors/
+   custom CSS. Any single waypoint or note can override this — check
+   "Custom box color for this one" on its card — for a box that should
+   stand out from the rest (e.g. a different category of content).
+7. Click **Preview** at any time to see the live scrollytelling reader.
+8. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
 
 The editor only runs locally during authoring — it's never part of the
 published site (see "How it's built" below).

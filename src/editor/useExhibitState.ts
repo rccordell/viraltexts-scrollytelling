@@ -61,22 +61,22 @@ export function useExhibitState(slug: string) {
   );
 
   const addWaypoint = useCallback(
-    (pageId: string, id: string, region: Region) => {
+    (pageId: string, id: string, region: Region, kind: "waypoint" | "note" = "waypoint") => {
       mutatePage(pageId, (p) => ({
         ...p,
         waypoints: [
           ...p.waypoints,
-          { id, kind: "waypoint", region, zoomPadding: 0.15, body: "" } satisfies Waypoint,
+          { id, kind, region, zoomPadding: 0.15, body: "" } satisfies Waypoint,
         ],
       }));
     },
     [mutatePage],
   );
 
-  /** Appends a "header" (subhead), "note", or "prose" entry — narrative
-   * content with no region of its own that doesn't move the image. */
+  /** Appends a "header" (subhead) or "prose" entry — narrative content with
+   * no region of its own that doesn't move the image. */
   const addEntry = useCallback(
-    (pageId: string, kind: "header" | "note" | "prose") => {
+    (pageId: string, kind: "header" | "prose") => {
       const id = crypto.randomUUID();
       mutatePage(pageId, (p) => ({
         ...p,
@@ -112,6 +112,16 @@ export function useExhibitState(slug: string) {
       mutatePage(pageId, (p) => ({
         ...p,
         waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, title } : w)),
+      }));
+    },
+    [mutatePage],
+  );
+
+  const updateWaypointStyle = useCallback(
+    (pageId: string, id: string, style: AnnotationStyle | undefined) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, style } : w)),
       }));
     },
     [mutatePage],
@@ -241,6 +251,7 @@ export function useExhibitState(slug: string) {
     updateWaypointRegion,
     updateWaypointBody,
     updateWaypointTitle,
+    updateWaypointStyle,
     removeWaypoint,
     reorderWaypoints,
     reloadPageImage,

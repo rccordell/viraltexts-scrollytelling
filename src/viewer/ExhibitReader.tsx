@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Exhibit, Region, Waypoint } from "./schema";
-import { FONT_STACKS, defaultTheme } from "./schema";
+import { FONT_STACKS, defaultAnnotationStyle, defaultTheme } from "./schema";
 import { useOpenSeadragonViewer } from "./useOpenSeadragonViewer";
 import { flyToWaypoint } from "./flyToWaypoint";
 import { useScrollSync } from "./scrollSync";
 import { WaypointBlock } from "./WaypointBlock";
 import { ProseBlock } from "./ProseBlock";
+import { NoteHotspots } from "./NoteHotspots";
+import { ActiveRegionHighlight } from "./ActiveRegionHighlight";
 import "./ExhibitReader.css";
 
 interface ExhibitReaderProps {
@@ -21,10 +23,22 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
   const dziUrl = `${assetBase}${page.image.dziPath}`;
   const { containerRef, viewer } = useOpenSeadragonViewer(dziUrl);
   const [activeId, setActiveId] = useState<string | undefined>(page.waypoints[0]?.id);
+  // Bumped on every explicit click (not on scroll-driven activation), so
+  // clicking the same already-active link again still re-flies the view —
+  // otherwise activeId wouldn't change and the effect below would never
+  // re-run, leaving a manual pan/zoom-away un-corrected.
+  const [flightNonce, setFlightNonce] = useState(0);
   const textRef = useRef<HTMLDivElement>(null);
 
   const onActivate = useCallback((id: string) => setActiveId(id), []);
-  const { registerBlock, jumpTo } = useScrollSync({ onActivate });
+  const { registerBlock, jumpTo: rawJumpTo } = useScrollSync({ onActivate });
+  const jumpTo = useCallback(
+    (id: string) => {
+      setFlightNonce((n) => n + 1);
+      rawJumpTo(id);
+    },
+    [rawJumpTo],
+  );
 
   useEffect(() => {
     setActiveId(page.waypoints[0]?.id);
@@ -39,7 +53,8 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
     // the last real waypoint rather than moving it.
     if (!waypoint || !waypoint.region) return;
     flyToWaypoint(viewer, waypoint as Waypoint & { region: Region });
-  }, [viewer, activeId, page.waypoints]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewer, activeId, flightNonce, page.waypoints]);
 
   const theme = exhibit.theme ?? defaultTheme;
   const themeVars = {
@@ -50,11 +65,20 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
   } as React.CSSProperties;
 
   const isLastPage = pageIndex === exhibit.pages.length - 1;
+  const notes = page.waypoints.filter(
+    (w): w is Waypoint & { region: Region } => w.kind === "note" && !!w.region,
+  );
+  const boxDefaultStyle = exhibit.annotationStyle ?? defaultAnnotationStyle;
+  const activeWaypoint = page.waypoints.find((w) => w.id === activeId);
+  const activeRegion = activeWaypoint?.region ?? null;
+  const activeStyle = activeWaypoint?.style ?? boxDefaultStyle;
 
   return (
     <div className="exhibit-reader" style={themeVars}>
       {theme.customCss && <style>{theme.customCss}</style>}
       <div className="exhibit-reader__viewer" ref={containerRef} />
+      <ActiveRegionHighlight viewer={viewer} region={activeRegion} style={activeStyle} />
+      <NoteHotspots viewer={viewer} notes={notes} defaultStyle={boxDefaultStyle} />
       <div className="exhibit-reader__text" ref={textRef}>
         {pageIndex === 0 && exhibit.intro && (
           <div className="exhibit-reader__intro">
@@ -64,6 +88,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
           </div>
         )}
         {page.waypoints.map((waypoint) => {
+          if (waypoint.kind === "note") return null;
           if (waypoint.kind === "prose") {
             return (
               <ProseBlock

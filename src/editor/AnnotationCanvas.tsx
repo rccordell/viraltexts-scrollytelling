@@ -71,10 +71,16 @@ export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCan
       }),
       [props.dziUrl],
     );
-    const drawingStyle = useMemo(
-      () => toDrawingStyle(props.annotationStyle ?? defaultAnnotationStyle),
-      [props.annotationStyle],
-    );
+    // A function (rather than a static style) so each drawn box can reflect
+    // its own waypoint's style override, falling back to the exhibit-wide
+    // "Box appearance" for boxes that don't have one.
+    const drawingStyle = useMemo(() => {
+      const fallback = toDrawingStyle(props.annotationStyle ?? defaultAnnotationStyle);
+      return (annotation: ImageAnnotation): DrawingStyle => {
+        const waypoint = props.waypoints.find((w) => w.id === annotation.id);
+        return waypoint?.style ? toDrawingStyle(waypoint.style) : fallback;
+      };
+    }, [props.annotationStyle, props.waypoints]);
     const annoHandleRef = useRef<AnnotoriousOpenSeadragonAnnotator | null>(null);
 
     useImperativeHandle(ref, () => ({
