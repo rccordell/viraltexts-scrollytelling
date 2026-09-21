@@ -1,7 +1,11 @@
 [
   {
     "slug": "love-letter",
-    "title": "A \"Stunning\" Love Letter to Viral Texts",
+    "title": "(Old) A \"Stunning\" Love Letter to Viral Texts",
     "subtitle": "The Raftsman's Journal, Clearfield, PA, November 4, 1868"
+  },
+  {
+    "slug": "loveletter",
+    "title": "A \"Stunning\" Love Letter to Viral Texts"
   }
 ]
