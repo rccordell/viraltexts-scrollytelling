@@ -10,6 +10,7 @@ import { ProseBlock } from "./ProseBlock";
 import { NoteHotspots } from "./NoteHotspots";
 import { NotePanel } from "./NotePanel";
 import { ActiveRegionHighlight } from "./ActiveRegionHighlight";
+import { ReadingMarker } from "./ReadingMarker";
 import "./ExhibitReader.css";
 
 interface ExhibitReaderProps {
@@ -32,7 +33,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
   const textRef = useRef<HTMLDivElement>(null);
 
   const onActivate = useCallback((id: string) => setActiveId(id), []);
-  const { registerBlock, jumpTo: rawJumpTo, markActive } = useScrollSync({
+  const { registerBlock, jumpTo: rawJumpTo, markActive, getElement } = useScrollSync({
     onActivate,
     scrollContainerRef: textRef,
   });
@@ -104,6 +105,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
       <ActiveRegionHighlight viewer={viewer} region={activeRegion} style={activeStyle} />
       <NoteHotspots viewer={viewer} notes={notes} defaultStyle={boxDefaultStyle} onSelect={jumpTo} />
       <div className="exhibit-reader__text" ref={textRef}>
+        <ReadingMarker activeId={activeId} getElement={getElement} />
         {pageIndex === 0 && exhibit.intro && (
           <div className="exhibit-reader__intro">
             <h1>{exhibit.title}</h1>

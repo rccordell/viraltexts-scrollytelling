@@ -171,5 +171,11 @@ export function useScrollSync({ onActivate, scrollContainerRef }: ScrollSyncOpti
     suppressUntilRef.current = Date.now() + 500;
   }
 
-  return { registerBlock, jumpTo, markActive };
+  /** The DOM element registered for a given waypoint id, if any (e.g. for
+   * measuring where to place a "currently reading" marker). */
+  function getElement(id: string): HTMLElement | undefined {
+    return blocksRef.current.get(id);
+  }
+
+  return { registerBlock, jumpTo, markActive, getElement };
 }
