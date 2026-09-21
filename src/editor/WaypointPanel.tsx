@@ -31,9 +31,23 @@ interface WaypointPanelProps {
   onChangeTitle: (id: string, title: string) => void;
   onChangeBody: (id: string, body: string) => void;
   onChangeStyle: (id: string, style: AnnotationStyle | undefined) => void;
+  onChangeMinZoomWidth: (id: string, minZoomWidth: number | undefined) => void;
   onDelete: (id: string) => void;
   onReorder: (orderedIds: string[]) => void;
 }
+
+// Offered as the starting point when an author first turns on a zoom floor
+// — wide enough to keep a single-word/phrase region from filling the
+// screen, without being a guess pulled from nowhere for every image size.
+const DEFAULT_MIN_ZOOM_WIDTH = 1500;
+
+const KIND_FILTERS: { value: Waypoint["kind"] | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "header", label: "Headers" },
+  { value: "prose", label: "Prose" },
+  { value: "waypoint", label: "Waypoints" },
+  { value: "note", label: "Notes" },
+];
 
 export function WaypointPanel({
   waypoints,
@@ -46,10 +60,13 @@ export function WaypointPanel({
   onChangeTitle,
   onChangeBody,
   onChangeStyle,
+  onChangeMinZoomWidth,
   onDelete,
   onReorder,
 }: WaypointPanelProps) {
   const sensors = useSensors(useSensor(PointerSensor));
+  const [query, setQuery] = useState("");
+  const [kindFilter, setKindFilter] = useState<Waypoint["kind"] | "all">("all");
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -58,6 +75,17 @@ export function WaypointPanel({
     const newIndex = waypoints.findIndex((w) => w.id === over.id);
     onReorder(arrayMove(waypoints, oldIndex, newIndex).map((w) => w.id));
   }
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const isFiltering = normalizedQuery !== "" || kindFilter !== "all";
+  const visibleWaypoints = waypoints.filter((w) => {
+    if (kindFilter !== "all" && w.kind !== kindFilter) return false;
+    if (!normalizedQuery) return true;
+    return (
+      (w.title ?? "").toLowerCase().includes(normalizedQuery) ||
+      (w.body ?? "").toLowerCase().includes(normalizedQuery)
+    );
+  });
 
   return (
     <div className="waypoint-panel">
@@ -90,6 +118,30 @@ export function WaypointPanel({
         </div>
       </div>
 
+      {waypoints.length > 0 && (
+        <div className="waypoint-panel__filters">
+          <input
+            type="search"
+            className="waypoint-panel__search"
+            placeholder="Filter by title or text…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="waypoint-panel__kind-chips">
+            {KIND_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                className={`waypoint-panel__kind-chip${kindFilter === f.value ? " waypoint-panel__kind-chip--active" : ""}`}
+                onClick={() => setKindFilter(f.value)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {waypoints.length === 0 ? (
         <p className="waypoint-panel__empty">
           Nothing here yet. Draw a waypoint to link an image region from the
@@ -97,11 +149,17 @@ export function WaypointPanel({
           image, or add a header or prose block for text that isn't tied to
           a specific spot.
         </p>
+      ) : visibleWaypoints.length === 0 ? (
+        <p className="waypoint-panel__empty">
+          {normalizedQuery
+            ? `No entries match "${query}"${kindFilter !== "all" ? ` in ${kindFilter}s` : ""}.`
+            : `No ${kindFilter}s yet.`}
+        </p>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={waypoints.map((w) => w.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={visibleWaypoints.map((w) => w.id)} strategy={verticalListSortingStrategy}>
             <ul className="waypoint-panel__list">
-              {waypoints.map((w) => (
+              {visibleWaypoints.map((w) => (
                 <SortableWaypointCard
                   key={w.id}
                   waypoint={w}
@@ -111,12 +169,18 @@ export function WaypointPanel({
                   onChangeTitle={(title) => onChangeTitle(w.id, title)}
                   onChangeBody={(body) => onChangeBody(w.id, body)}
                   onChangeStyle={(style) => onChangeStyle(w.id, style)}
+                  onChangeMinZoomWidth={(minZoomWidth) => onChangeMinZoomWidth(w.id, minZoomWidth)}
                   onDelete={() => onDelete(w.id)}
                 />
               ))}
             </ul>
           </SortableContext>
         </DndContext>
+      )}
+      {isFiltering && visibleWaypoints.length > 0 && (
+        <p className="waypoint-panel__filter-count">
+          Showing {visibleWaypoints.length} of {waypoints.length}
+        </p>
       )}
     </div>
   );
@@ -130,6 +194,7 @@ interface CardProps {
   onChangeTitle: (title: string) => void;
   onChangeBody: (body: string) => void;
   onChangeStyle: (style: AnnotationStyle | undefined) => void;
+  onChangeMinZoomWidth: (minZoomWidth: number | undefined) => void;
   onDelete: () => void;
 }
 
@@ -172,6 +237,7 @@ function SortableWaypointCard({
   onChangeTitle,
   onChangeBody,
   onChangeStyle,
+  onChangeMinZoomWidth,
   onDelete,
 }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -300,6 +366,34 @@ function SortableWaypointCard({
           </label>
           {waypoint.style && (
             <AnnotationStyleFields style={waypoint.style} onChange={onChangeStyle} />
+          )}
+        </div>
+      )}
+      {selected && (waypoint.kind === "waypoint" || waypoint.kind === "note") && (
+        <div className="waypoint-card__zoom-override" onClick={(e) => e.stopPropagation()}>
+          <label className="waypoint-card__zoom-override-toggle">
+            <input
+              type="checkbox"
+              checked={waypoint.minZoomWidth != null}
+              onChange={(e) =>
+                onChangeMinZoomWidth(e.target.checked ? DEFAULT_MIN_ZOOM_WIDTH : undefined)
+              }
+            />
+            Limit how close this zooms
+          </label>
+          {waypoint.minZoomWidth != null && (
+            <label className="waypoint-card__zoom-override-field">
+              Show at least
+              <input
+                type="number"
+                min={1}
+                value={waypoint.minZoomWidth}
+                onChange={(e) => onChangeMinZoomWidth(Number(e.target.value) || 1)}
+                onClick={(e) => e.stopPropagation()}
+              />
+              image pixels wide — good for a region drawn tightly around a
+              single word or short phrase.
+            </label>
           )}
         </div>
       )}

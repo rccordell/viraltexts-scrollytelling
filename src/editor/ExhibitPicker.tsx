@@ -12,10 +12,30 @@ export function ExhibitPicker({ onChoose, onCreate }: ExhibitPickerProps) {
   const [newSlug, setNewSlug] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingSlug, setConfirmingSlug] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api.listExhibits().then(setExhibits).catch((err) => setError(String(err)));
   }, []);
+
+  async function handleDelete(slug: string) {
+    if (confirmingSlug !== slug) {
+      setConfirmingSlug(slug);
+      return;
+    }
+    setDeleting(true);
+    setError(null);
+    try {
+      await api.deleteExhibit(slug);
+      setExhibits((prev) => prev.filter((e) => e.slug !== slug));
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setDeleting(false);
+      setConfirmingSlug(null);
+    }
+  }
 
   async function handleCreate() {
     setError(null);
@@ -37,11 +57,21 @@ export function ExhibitPicker({ onChoose, onCreate }: ExhibitPickerProps) {
     <div className="exhibit-picker">
       <h1>Exhibits</h1>
       {exhibits.length > 0 && (
-        <ul>
+        <ul className="exhibit-picker__list">
           {exhibits.map((e) => (
-            <li key={e.slug}>
-              <button type="button" onClick={() => onChoose(e.slug)}>
+            <li key={e.slug} className="exhibit-picker__row">
+              <button type="button" className="exhibit-picker__choose" onClick={() => onChoose(e.slug)}>
                 {e.title}
+              </button>
+              <button
+                type="button"
+                className={`exhibit-picker__delete${confirmingSlug === e.slug ? " exhibit-picker__delete--confirming" : ""}`}
+                onClick={() => handleDelete(e.slug)}
+                onBlur={() => setConfirmingSlug((s) => (s === e.slug ? null : s))}
+                disabled={deleting && confirmingSlug === e.slug}
+                title={confirmingSlug === e.slug ? "Click again to permanently delete" : "Delete this exhibit"}
+              >
+                {confirmingSlug === e.slug ? (deleting ? "Deleting…" : "Confirm delete?") : "Delete"}
               </button>
             </li>
           ))}

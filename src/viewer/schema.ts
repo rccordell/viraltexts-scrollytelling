@@ -45,6 +45,12 @@ export const waypointSchema = z
     kind: entryKindSchema.default("waypoint"),
     region: regionSchema.optional(),
     zoomPadding: z.number().default(0.15),
+    // Floors how close a fly-to can zoom, in image pixels of width: useful
+    // for a region drawn tightly around a single word or short phrase,
+    // where fitting the box exactly would zoom in far past useful context.
+    // Unset means "fit the region (plus zoomPadding) exactly," today's
+    // behavior.
+    minZoomWidth: z.number().positive().optional(),
     title: z.string().optional(),
     body: z.string().default(""),
     // Overrides the exhibit-wide "Box appearance" for just this box, so an

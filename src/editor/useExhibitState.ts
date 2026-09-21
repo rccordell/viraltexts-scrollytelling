@@ -127,6 +127,16 @@ export function useExhibitState(slug: string) {
     [mutatePage],
   );
 
+  const updateWaypointMinZoomWidth = useCallback(
+    (pageId: string, id: string, minZoomWidth: number | undefined) => {
+      mutatePage(pageId, (p) => ({
+        ...p,
+        waypoints: p.waypoints.map((w) => (w.id === id ? { ...w, minZoomWidth } : w)),
+      }));
+    },
+    [mutatePage],
+  );
+
   const removeWaypoint = useCallback(
     (pageId: string, id: string) => {
       mutatePage(pageId, (p) => ({
@@ -252,6 +262,7 @@ export function useExhibitState(slug: string) {
     updateWaypointBody,
     updateWaypointTitle,
     updateWaypointStyle,
+    updateWaypointMinZoomWidth,
     removeWaypoint,
     reorderWaypoints,
     reloadPageImage,

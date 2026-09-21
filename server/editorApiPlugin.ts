@@ -1,7 +1,7 @@
 import type { Plugin, ViteDevServer } from "vite";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { existsSync } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { readJson, writeJsonAtomic } from "./fsUtil.js";
 import { generateDziTiles } from "./tiling.js";
@@ -93,6 +93,14 @@ export function editorApiPlugin(): Plugin {
           if (segments.length === 1 && method === "PUT") {
             const body = await readBody(req);
             await writeJsonAtomic(exhibitPath(slug), body);
+            return sendJson(res, 200, { ok: true });
+          }
+
+          // DELETE /api/exhibits/:slug
+          if (segments.length === 1 && method === "DELETE") {
+            const dir = path.join(EXHIBITS_DIR, slug);
+            if (!existsSync(dir)) return sendJson(res, 404, { error: "Not found" });
+            await rm(dir, { recursive: true, force: true });
             return sendJson(res, 200, { ok: true });
           }
 

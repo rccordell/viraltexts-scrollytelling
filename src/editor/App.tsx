@@ -60,6 +60,7 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
     updateWaypointBody,
     updateWaypointTitle,
     updateWaypointStyle,
+    updateWaypointMinZoomWidth,
     removeWaypoint,
     reorderWaypoints,
     reloadPageImage,
@@ -278,6 +279,9 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
               onChangeTitle={(id, title) => updateWaypointTitle(currentPage.id, id, title)}
               onChangeBody={(id, body) => updateWaypointBody(currentPage.id, id, body)}
               onChangeStyle={(id, style) => updateWaypointStyle(currentPage.id, id, style)}
+              onChangeMinZoomWidth={(id, minZoomWidth) =>
+                updateWaypointMinZoomWidth(currentPage.id, id, minZoomWidth)
+              }
               onDelete={(id) => {
                 canvasRef.current?.removeAnnotation(id);
                 removeWaypoint(currentPage.id, id);
