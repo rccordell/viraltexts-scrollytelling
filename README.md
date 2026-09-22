@@ -4,7 +4,8 @@ A small, database-free tool for building "scrollytelling" exhibits over a
 deep-zoomable image: scroll (or click) through annotated text and the image
 pans/zooms to the region each passage discusses. Built to replace a
 Neatline/Omeka exhibit ([loveletter.viraltexts.org](https://loveletter.viraltexts.org))
-whose dynamic behavior stopped working after Neatline went unmaintained.
+whose dynamic behavior stopped working after the development of several
+Neatline plugins halted.
 
 Each exhibit is a plain folder under `exhibits/<slug>/` — a source image, a
 generated Deep Zoom tile pyramid, and an `exhibit.json` config — so exhibits
