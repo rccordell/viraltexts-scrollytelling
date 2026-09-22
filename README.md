@@ -52,6 +52,22 @@ Opens the reader app at `http://localhost:5173`, listing exhibits under
 known regions; it's excluded from the public exhibit list and from builds
 (any `exhibits/` folder starting with `_` is treated as dev-only).
 
+## Annotation types
+
+Every entry in an exhibit's waypoint list is one of four kinds:
+
+| Kind | Region? | In the scroll flow? | What it does |
+| --- | --- | --- | --- |
+| **Header** | No | Yes | A subhead (title only, no body) that breaks up a long exhibit into sections. Never moves the image. |
+| **Prose** | No | Yes | A long-form markdown block. Its body can link a word or phrase mid-paragraph to *another* entry's region — `[the phrase](#some-waypoint-id)` — so clicking or hovering that phrase pans/zooms the image, without the phrase needing its own block. |
+| **Waypoint** | Yes | Yes, if given a title/body — otherwise invisible | The main scroll-synced building block. As the reader scrolls a waypoint into view (or clicks it), the image pans/zooms to its region. Leave title and body empty and it becomes **anchor-only**: it never appears as its own block, existing solely as a region for a Prose entry to link to (see above) — this is how a single word inside a longer passage gets tied to a spot on the image. |
+| **Note** | Yes | No — never appears as a block | A region that stays invisible on the image until the mouse is over it, then highlights, independent of scroll position. Clicking it — directly, or via an inline Prose link — pans/zooms to the region and shows its text in a panel docked to the image, without disturbing the reader's place in the scrolling text. For an aside that belongs to one spot on the image but isn't part of the main narrative. |
+
+A couple of other per-entry settings, available on any Waypoint or Note:
+
+- **Custom box color** — overrides the exhibit-wide "Box appearance" for just that one region, e.g. to visually set apart a category of content.
+- **Zoom floor (`minZoomWidth`)** — for a region drawn tightly around a single word or short phrase, fitting the box exactly would zoom in until that word fills the screen. Setting a minimum width (in image pixels) keeps the fly-to zoomed out enough to show useful surrounding context — the reader's column of the newspaper, say — no matter how small the drawn box is.
+
 ## Authoring an exhibit
 
 ```bash
@@ -96,7 +112,7 @@ Opens the visual editor at `http://localhost:5174/editor.html`. From there:
 8. Click **Save** to write `exhibits/<slug>/exhibit.json` to disk.
 
 The editor only runs locally during authoring — it's never part of the
-published site (see "How it's built" below).
+published site (see "Building & deploying" below).
 
 ## Adding an image
 
@@ -143,3 +159,7 @@ S3, etc. Just upload the contents of `export/<slug>/` and visit that URL.
 Use `npm run build` when you want one site hosting a collection of
 exhibits; use `npm run export` when you want to hand a single exhibit to a
 domain you don't control the whole deploy pipeline for.
+
+The editor's header also has an **Export** button that does the same
+thing without leaving the browser — it saves any unsaved changes, then
+builds the current exhibit into `export/<slug>/` and shows the output path.
