@@ -11,6 +11,7 @@ import { NoteHotspots } from "./NoteHotspots";
 import { NotePanel } from "./NotePanel";
 import { ActiveRegionHighlight } from "./ActiveRegionHighlight";
 import { ReadingMarker } from "./ReadingMarker";
+import { externalLinkComponents } from "./markdownLinks";
 import "./ExhibitReader.css";
 
 interface ExhibitReaderProps {
@@ -110,7 +111,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
           <div className="exhibit-reader__intro">
             <h1>{exhibit.title}</h1>
             {exhibit.subtitle && <p className="subtitle">{exhibit.subtitle}</p>}
-            <ReactMarkdown>{exhibit.intro}</ReactMarkdown>
+            <ReactMarkdown components={externalLinkComponents}>{exhibit.intro}</ReactMarkdown>
           </div>
         )}
         {page.waypoints.map((waypoint) => {
@@ -166,7 +167,7 @@ export function ExhibitReader({ exhibit, assetBase }: ExhibitReaderProps) {
         )}
         {isLastPage && exhibit.credits && (
           <div className="exhibit-reader__credits">
-            <ReactMarkdown>{exhibit.credits}</ReactMarkdown>
+            <ReactMarkdown components={externalLinkComponents}>{exhibit.credits}</ReactMarkdown>
           </div>
         )}
       </div>

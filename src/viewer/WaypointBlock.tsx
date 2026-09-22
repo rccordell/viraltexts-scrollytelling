@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import type { Waypoint } from "./schema";
+import { externalLinkComponents } from "./markdownLinks";
 
 interface WaypointBlockProps {
   waypoint: Waypoint;
@@ -35,7 +36,7 @@ export function WaypointBlock({
       onClick={onClick}
     >
       {waypoint.title && <h3>{waypoint.title}</h3>}
-      <ReactMarkdown>{waypoint.body}</ReactMarkdown>
+      <ReactMarkdown components={externalLinkComponents}>{waypoint.body}</ReactMarkdown>
     </section>
   );
 }

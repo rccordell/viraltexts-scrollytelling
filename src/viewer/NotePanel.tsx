@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Region, Waypoint } from "./schema";
+import { externalLinkComponents } from "./markdownLinks";
 
 type Note = Waypoint & { region: Region };
 
@@ -50,7 +51,7 @@ export function NotePanel({ note, flightNonce }: NotePanelProps) {
         ×
       </button>
       {note.title && <h4>{note.title}</h4>}
-      <ReactMarkdown>{note.body}</ReactMarkdown>
+      <ReactMarkdown components={externalLinkComponents}>{note.body}</ReactMarkdown>
     </div>
   );
 }

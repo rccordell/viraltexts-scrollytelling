@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Waypoint } from "./schema";
+import { ExternalLink } from "./markdownLinks";
 
 interface ProseBlockProps {
   waypoint: Waypoint;
@@ -60,11 +61,7 @@ export function ProseBlock({ waypoint, activeId, registerBlock, onJumpTo, onHove
         components={{
           a: ({ href, children }) => {
             if (!href?.startsWith("#")) {
-              return (
-                <a href={href} target="_blank" rel="noreferrer">
-                  {children}
-                </a>
-              );
+              return <ExternalLink href={href}>{children}</ExternalLink>;
             }
             const targetId = href.slice(1);
             return (
