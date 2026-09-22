@@ -98,6 +98,41 @@ body {
   gap: 0.5rem;
 }
 
+.export-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: #1e3a2b;
+  border-bottom: 1px solid #2f5c42;
+  font-size: 0.85rem;
+}
+
+.export-banner code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+}
+
+.export-banner--error {
+  background: #3a1e1e;
+  border-bottom-color: #5c2f2f;
+}
+
+.export-banner__dismiss {
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.export-banner__dismiss:hover {
+  opacity: 1;
+}
+
 .page-tabs {
   display: flex;
   align-items: center;

@@ -77,6 +77,9 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
   const [currentPageId, setCurrentPageId] = useState<string | undefined>();
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [previewing, setPreviewing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportResult, setExportResult] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   const canvasRef = useRef<AnnotationCanvasHandle>(null);
 
   // Dragging pans the image by default (so you can navigate around while
@@ -129,6 +132,24 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
     onBack();
   }
 
+  async function handleExport() {
+    setExportError(null);
+    setExportResult(null);
+    setExporting(true);
+    try {
+      // Export reads the exhibit from disk, so make sure disk matches what's
+      // on screen before building — otherwise a just-edited, unsaved change
+      // would silently be left out of the export.
+      if (dirty) await save();
+      const { outDir } = await api.exportExhibit(slug);
+      setExportResult(outDir);
+    } catch (err) {
+      setExportError(String(err));
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="editor-layout">
       <header className="editor-header">
@@ -148,8 +169,34 @@ function ExhibitEditor({ slug, onBack }: { slug: string; onBack: () => void }) {
           <button type="button" onClick={save} disabled={!dirty || saving}>
             {saving ? "Saving…" : dirty ? "Save" : "Saved"}
           </button>
+          <button type="button" onClick={handleExport} disabled={exporting}>
+            {exporting ? "Exporting…" : "Export"}
+          </button>
         </div>
       </header>
+      {(exportResult || exportError) && (
+        <div className={`export-banner${exportError ? " export-banner--error" : ""}`}>
+          {exportError ? (
+            <span>Export failed: {exportError}</span>
+          ) : (
+            <span>
+              Exported to <code>{exportResult}/</code> — upload that folder's contents to any static
+              web host.
+            </span>
+          )}
+          <button
+            type="button"
+            className="export-banner__dismiss"
+            onClick={() => {
+              setExportResult(null);
+              setExportError(null);
+            }}
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {!previewing && (
         <div className="page-tabs">

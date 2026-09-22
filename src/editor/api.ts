@@ -31,6 +31,11 @@ export const api = {
   deleteExhibit: (slug: string) =>
     fetch(`/api/exhibits/${slug}`, { method: "DELETE" }).then((r) => json<{ ok: true }>(r)),
 
+  exportExhibit: (slug: string) =>
+    fetch(`/api/exhibits/${slug}/export`, { method: "POST" }).then((r) =>
+      json<{ ok: true; outDir: string }>(r),
+    ),
+
   importImage: (slug: string, pageId: string, sourcePath: string) =>
     fetch(`/api/exhibits/${slug}/pages/${pageId}/import-image`, {
       method: "POST",

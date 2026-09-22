@@ -5,8 +5,10 @@ import { readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { readJson, writeJsonAtomic } from "./fsUtil.js";
 import { generateDziTiles } from "./tiling.js";
+import { exportExhibit, ExportError } from "./exportExhibit.js";
 
-const EXHIBITS_DIR = path.resolve(process.cwd(), "exhibits");
+const ROOT_DIR = process.cwd();
+const EXHIBITS_DIR = path.resolve(ROOT_DIR, "exhibits");
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]*$/i;
 
 function isValidSlug(slug: string): boolean {
@@ -123,6 +125,19 @@ export function editorApiPlugin(): Plugin {
               ],
             });
             return sendJson(res, 201, { ok: true });
+          }
+
+          // POST /api/exhibits/:slug/export
+          if (segments.length === 2 && action === "export" && method === "POST") {
+            try {
+              const { outDir } = await exportExhibit(ROOT_DIR, slug);
+              return sendJson(res, 200, { ok: true, outDir: path.relative(ROOT_DIR, outDir) });
+            } catch (err) {
+              const status = err instanceof ExportError ? 400 : 500;
+              return sendJson(res, status, {
+                error: err instanceof Error ? err.message : String(err),
+              });
+            }
           }
 
           // POST /api/exhibits/:slug/pages/:pageId/import-image  { sourcePath: string }
